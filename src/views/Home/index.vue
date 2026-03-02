@@ -123,11 +123,13 @@ function toggle3D(): void {
   is3D.value = !is3D.value
   if (map) {
     if (is3D.value) {
-      map.setViewMode('3D')
+      // 3D模式：设置倾斜角度
       map.setPitch(50)
+      map.setRotation(0)
     } else {
-      map.setViewMode('2D')
+      // 2D模式：pitch=0就是俯视效果
       map.setPitch(0)
+      map.setRotation(0)
     }
   }
 }
