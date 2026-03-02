@@ -1,0 +1,301 @@
+<template>
+  <div class="effect-sidebar" :class="{ collapsed }">
+    <div class="sidebar-header">
+      <h3 class="title">
+        <el-icon><MagicStick /></el-icon>
+        地图特效库
+      </h3>
+      <el-button
+        link
+        @click="$emit('update:collapsed', !collapsed)"
+        class="collapse-btn"
+        :icon="collapsed ? ArrowRight : ArrowLeft"
+      />
+    </div>
+
+    <div class="sidebar-content" v-if="!collapsed">
+      <div class="search-box">
+        <el-input
+          :model-value="searchKeyword"
+          @input="$emit('update:searchKeyword', $event)"
+          placeholder="搜索特效..."
+          clearable
+          size="small"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+      </div>
+
+      <div class="category-tabs">
+        <el-tabs :model-value="activeCategory" @tab-change="handleTabChange">
+          <el-tab-pane label="全部" name="all"></el-tab-pane>
+          <el-tab-pane label="标记" name="marker"></el-tab-pane>
+          <el-tab-pane label="路径" name="path"></el-tab-pane>
+          <el-tab-pane label="区域" name="area"></el-tab-pane>
+          <el-tab-pane label="3D" name="3d"></el-tab-pane>
+          <el-tab-pane label="粒子" name="particle"></el-tab-pane>
+          <el-tab-pane label="天气" name="weather"></el-tab-pane>
+        </el-tabs>
+      </div>
+
+      <div class="effect-list">
+        <div
+          v-for="effect in effects"
+          :key="effect.id"
+          class="effect-item"
+          :class="{ active: selectedEffect?.id === effect.id }"
+          @click="$emit('select', effect)"
+        >
+          <div class="effect-icon" :class="`icon-${effect.category}`">
+            <el-icon :size="24">
+              <component :is="effect.icon" />
+            </el-icon>
+          </div>
+          <div class="effect-info">
+            <div class="effect-name">{{ effect.name }}</div>
+            <div class="effect-meta">
+              <el-tag
+                :type="getDifficultyType(effect.difficulty)"
+                size="small"
+              >
+                {{ effect.difficulty }}
+              </el-tag>
+            </div>
+          </div>
+          <el-icon v-if="selectedEffect?.id === effect.id" class="check-icon">
+            <Check />
+          </el-icon>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { MagicStick, ArrowLeft, ArrowRight, Search, Check } from '@element-plus/icons-vue'
+import type { MapEffect } from '../config/effectsConfig'
+import { DIFFICULTY_TYPES } from '../config/effectsConfig'
+
+interface Props {
+  collapsed: boolean
+  activeCategory: string
+  searchKeyword: string
+  effects: MapEffect[]
+  selectedEffect: MapEffect | null
+}
+
+interface Emits {
+  (e: 'update:collapsed', value: boolean): void
+  (e: 'update:activeCategory', value: string): void
+  (e: 'update:searchKeyword', value: string): void
+  (e: 'select', effect: MapEffect): void
+}
+
+defineProps<Props>()
+defineEmits<Emits>()
+
+function getDifficultyType(difficulty: string): string {
+  return DIFFICULTY_TYPES[difficulty] || ''
+}
+
+function handleTabChange(name: string): void {
+  const emit = defineEmits<Emits>()
+  emit('update:activeCategory', name)
+}
+</script>
+
+<style lang="scss" scoped>
+.effect-sidebar {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  width: 320px;
+  max-height: calc(100vh - 40px);
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+
+  &.collapsed {
+    width: 60px;
+  }
+
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eee;
+
+    .title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .collapse-btn {
+      padding: 4px;
+    }
+  }
+
+  .sidebar-content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .search-box {
+    padding: 12px 16px;
+  }
+
+  .category-tabs {
+    :deep(.el-tabs__header) {
+      margin: 0;
+    }
+
+    :deep(.el-tabs__nav-wrap::after) {
+      display: none;
+    }
+
+    :deep(.el-tabs__item) {
+      font-size: 13px;
+      padding: 0 12px;
+    }
+  }
+
+  .effect-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+  }
+
+  .effect-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    border: 2px solid transparent;
+
+    &:hover {
+      background: #f8f9fa;
+    }
+
+    &.active {
+      border-color: #667eea;
+      background: rgba(102, 126, 234, 0.05);
+
+      .effect-name {
+        color: #667eea;
+      }
+
+      .check-icon {
+        color: #667eea;
+      }
+
+      &.icon-marker {
+        border-color: #667eea;
+      }
+
+      &.icon-path {
+        border-color: #f5576c;
+      }
+
+      &.icon-area {
+        border-color: #4facfe;
+      }
+
+      &.icon-3d {
+        border-color: #43e97b;
+      }
+
+      &.icon-particle {
+        border-color: #fa709a;
+      }
+
+      &.icon-weather {
+        border-color: #a8edea;
+      }
+    }
+
+    .effect-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+
+      &.icon-marker {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+
+      &.icon-path {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      }
+
+      &.icon-area {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      }
+
+      &.icon-3d {
+        background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      }
+
+      &.icon-particle {
+        background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      }
+
+      &.icon-weather {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      }
+    }
+
+    .effect-info {
+      flex: 1;
+
+      .effect-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 4px;
+      }
+
+      .effect-meta {
+        display: flex;
+        gap: 6px;
+      }
+    }
+
+    .check-icon {
+      color: #667eea;
+      font-size: 20px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .effect-sidebar {
+    width: 280px;
+
+    &.collapsed {
+      width: 50px;
+    }
+  }
+}
+</style>
