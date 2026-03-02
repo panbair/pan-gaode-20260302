@@ -47,3 +47,6 @@ Thumbs.db
 .Spotlight-V100
 .Trashes
 ehthumbs.db
+
+# Source code backup
+src/views/Home/源码/
