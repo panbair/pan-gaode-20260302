@@ -12,7 +12,7 @@ import { HeatMapEffect } from './heatMapEffect'
 import { Buildings3DEffect } from './buildings3DEffect'
 import { ParticleFlowEffect } from './particleFlowEffect'
 import { SunnyWeatherEffect } from './sunnyWeatherEffect'
-import { NightModeEffect } from './nightModeEffect'
+import { NightWeatherEffect } from './nightWeatherEffect'
 import { MarkerClusterEffect } from './markerClusterEffect'
 import { FlightPathEffect } from './flightPathEffect'
 import { AreaCoverageEffect } from './areaCoverageEffect'
@@ -27,7 +27,7 @@ export class EffectFactory {
     4: Buildings3DEffect,
     5: ParticleFlowEffect,
     6: SunnyWeatherEffect,
-    7: NightModeEffect,
+    7: NightWeatherEffect,
     8: MarkerClusterEffect,
     9: FlightPathEffect,
     10: AreaCoverageEffect,

@@ -54,6 +54,61 @@ export abstract class BaseEffect {
       if (this.result.layer.setMap) this.result.layer.setMap(null)
     }
 
+    // 清理 sunRays
+    if (this.result.sunRays) {
+      if (this.result.sunRays.destroy) this.result.sunRays.destroy()
+    }
+
+    // 清理 sunParticles
+    if (this.result.sunParticles) {
+      if (this.result.sunParticles.destroy) this.result.sunParticles.destroy()
+    }
+
+    // 清理 floatingParticles
+    if (this.result.floatingParticles) {
+      if (this.result.floatingParticles.destroy) this.result.floatingParticles.destroy()
+    }
+
+    // 清理 warmCircles
+    if (this.result.warmCircles) {
+      if (this.result.warmCircles.destroy) this.result.warmCircles.destroy()
+    }
+
+    // 清理 moon
+    if (this.result.moon) {
+      if (this.result.moon.destroy) this.result.moon.destroy()
+    }
+
+    // 清理 moonGlow
+    if (this.result.moonGlow) {
+      if (this.result.moonGlow.destroy) this.result.moonGlow.destroy()
+    }
+
+    // 清理 stars
+    if (this.result.stars) {
+      if (this.result.stars.destroy) this.result.stars.destroy()
+    }
+
+    // 清理 cluster (MarkerCluster)
+    if (this.result.cluster) {
+      if (this.result.cluster.setData) {
+        this.result.cluster.setData([])
+        this.result.cluster.setMap(null)
+      }
+    }
+
+    // 清理 fireflies
+    if (this.result.fireflies) {
+      if (this.result.fireflies.destroy) this.result.fireflies.destroy()
+    }
+
+    // 清理 layers 数组
+    if (this.result.layers) {
+      this.result.layers.forEach((layer: any) => {
+        if (layer.destroy) layer.destroy()
+      })
+    }
+
     // 自定义清理函数
     if (this.result.cleanup) {
       this.result.cleanup()

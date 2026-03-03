@@ -161,7 +161,7 @@ async function initMap(): Promise<void> {
     AMap = await AMapLoader.load({
       key: AMAP_KEY,
       version: '2.0',
-      plugins: ['AMap.Buildings', 'AMap.MarkerClusterer', 'AMap.MoveAnimation'],
+      plugins: ['AMap.Buildings', 'AMap.MarkerCluster', 'AMap.MoveAnimation'],
       Loca: {
         version: '2.0.0'
       }
