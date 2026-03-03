@@ -22,33 +22,53 @@ export class MapEffectHandler {
    * 清除当前特效
    */
   clear(): void {
+    console.log('[MapEffectHandler] 开始清除特效')
+
+    // 清理当前特效
     if (this.currentEffect) {
-      this.currentEffect.cleanup()
+      try {
+        this.currentEffect.cleanup()
+      } catch (error) {
+        console.error('[MapEffectHandler] 清理特效时出错:', error)
+      }
       this.currentEffect = null
     }
 
+    // 停止 Loca 动画
     if (this.loca) {
-      this.loca.animate.stop()
-      if (typeof this.loca.clear === 'function') {
-        this.loca.clear()
+      try {
+        this.loca.animate.stop()
+        if (typeof this.loca.clear === 'function') {
+          this.loca.clear()
+        }
+      } catch (error) {
+        console.error('[MapEffectHandler] 清理 Loca 时出错:', error)
       }
+    }
+
+    // 清理 Three.js 容器
+    const threeContainer = document.getElementById('three-container')
+    if (threeContainer) {
+      threeContainer.remove()
     }
 
     // 重置地图状态
     if (this.map) {
-      this.map.clearMap()
-      this.map.setMapStyle('amap://styles/normal')
-      if (typeof this.map.setWeather === 'function') {
-        this.map.setWeather({ type: 'none' })
+      try {
+        this.map.clearMap()
+        this.map.setMapStyle('amap://styles/normal')
+        // 恢复默认视角
+        this.map.setPitch(0)
+        if (typeof this.map.setRotation === 'function') {
+          this.map.setRotation(0)
+        }
+        this.map.setZoom(13)
+      } catch (error) {
+        console.error('[MapEffectHandler] 重置地图时出错:', error)
       }
-      // 不再切换viewMode，保持3D模式
-      // setPitch(0) 在3D模式下就是俯视2D效果
-      this.map.setPitch(0)
-      if (typeof this.map.setRotation === 'function') {
-        this.map.setRotation(0)
-      }
-      this.map.setZoom(13)
     }
+
+    console.log('[MapEffectHandler] 特效清除完成')
   }
 
   /**

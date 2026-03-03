@@ -88,6 +88,17 @@ function getCategoryLabel(category: string): string {
 }
 
 function handleEffectSelect(effect: MapEffect): void {
+  // 如果点击的是当前已选中的特效，则取消特效
+  if (currentEffect.value && currentEffect.value.id === effect.id) {
+    currentEffect.value = null
+    if (effectHandler) {
+      effectHandler.clear()
+    }
+    resetMap()
+    return
+  }
+
+  // 否则应用新特效
   currentEffect.value = effect
   if (effectHandler) {
     effectHandler.applyEffect(effect.id)
@@ -141,7 +152,7 @@ function resetMap(): void {
     map.setPitch(0)  // 3D模式下设置为0就是俯视2D效果
     map.setRotation(0)
     map.setMapStyle('amap://styles/normal')
-    map.setWeather({ type: 'none' })
+    // setWeather 方法不存在，移除此行
   }
 }
 
