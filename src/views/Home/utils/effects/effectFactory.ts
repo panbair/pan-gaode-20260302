@@ -7,6 +7,7 @@ import type { EffectContext } from './types'
 import { BaseEffect } from './baseEffect'
 import { PulseMarkerEffect } from './pulseMarkerEffect'
 import { RunningPathEffect } from './runningPathEffect'
+import { HeatAreaEffect } from './heatAreaEffect'
 import { HeatMapEffect } from './heatMapEffect'
 import { Buildings3DEffect } from './buildings3DEffect'
 import { ParticleFlowEffect } from './particleFlowEffect'
@@ -22,7 +23,7 @@ export class EffectFactory {
   private static effectClasses: Record<number, new (context: EffectContext) => BaseEffect> = {
     1: PulseMarkerEffect,
     2: RunningPathEffect,
-    3: HeatMapEffect,
+    3: HeatAreaEffect,
     4: Buildings3DEffect,
     5: ParticleFlowEffect,
     6: SunnyWeatherEffect,

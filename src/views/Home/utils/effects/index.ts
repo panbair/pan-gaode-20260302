@@ -12,6 +12,7 @@ export { BaseEffect } from './baseEffect'
 // 特效类
 export { PulseMarkerEffect } from './pulseMarkerEffect'
 export { RunningPathEffect } from './runningPathEffect'
+export { HeatAreaEffect } from './heatAreaEffect'
 export { HeatMapEffect } from './heatMapEffect'
 export { Buildings3DEffect } from './buildings3DEffect'
 export { ParticleFlowEffect } from './particleFlowEffect'
