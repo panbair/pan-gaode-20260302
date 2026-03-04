@@ -11,6 +11,7 @@ export class MapEffectHandler {
   private loca: any = null
   private currentEffect: any = null
   private AMap: any = null
+  private locaLayers: any[] = []
 
   constructor(map: any, loca: any, AMap: any) {
     this.map = map
@@ -38,11 +39,26 @@ export class MapEffectHandler {
     if (this.loca) {
       try {
         this.loca.animate.stop()
-        if (typeof this.loca.clear === 'function') {
-          this.loca.clear()
+      } catch (error) {
+        // 静默处理
+      }
+
+      // 手动清理 Loca 图层，避免调用 clear() 导致内部错误
+      try {
+        // 移除所有已添加的图层
+        while (this.locaLayers.length > 0) {
+          const layer = this.locaLayers.pop()
+          if (layer) {
+            try {
+              layer.setData([])
+              this.loca.remove(layer)
+            } catch (e) {
+              // 静默处理单个图层清理错误
+            }
+          }
         }
       } catch (error) {
-        console.error('[MapEffectHandler] 清理 Loca 时出错:', error)
+        console.error('[MapEffectHandler] 清理 Loca 图层时出错:', error)
       }
     }
 

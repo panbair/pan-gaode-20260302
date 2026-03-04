@@ -33,8 +33,8 @@ export class SunnyWeatherEffect extends BaseEffect {
     const floatingParticles = this.createFloatingParticles(centerPoint)
 
     // 添加所有图层（按层级顺序）
-    if (sunRays) this.loca.add(sunRays)
-    if (floatingParticles) this.loca.add(floatingParticles)
+    if (sunRays) this.addLocaLayer(sunRays)
+    if (floatingParticles) this.addLocaLayer(floatingParticles)
 
     this.setResult({
       sunRays,

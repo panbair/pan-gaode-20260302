@@ -184,7 +184,7 @@ export class FlightPathEffect extends BaseEffect {
     })
     console.log('[FlightPathEffect] 设置样式完成')
 
-    this.loca.add(layer)
+    this.addLocaLayer(layer)
     console.log('[FlightPathEffect] 图层已添加到 loca')
 
     this.setResult({

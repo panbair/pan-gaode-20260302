@@ -4,23 +4,49 @@
 
 import { BaseEffect } from './baseEffect'
 
+interface Feature {
+  type: string
+  properties: {
+    color: string
+    height: number
+  }
+  geometry: {
+    type: string
+    coordinates: number[][]
+  }
+}
+
+interface FeatureProperties {
+  color?: string
+  height?: number
+}
+
+interface GeoData {
+  type: string
+  features: Feature[]
+}
+
 export class MassivePointsEffect extends BaseEffect {
   apply(): void {
     console.log('[MassivePointsEffect] 开始应用海量点云线条网格特效')
 
-    if (!this.loca) {
+    if (!this.isLocaAvailable()) {
       console.warn('[MassivePointsEffect] loca 未初始化，无法应用特效')
       return
     }
 
-    // 调整视角
+    if (!this.isMapAvailable()) {
+      console.warn('[MassivePointsEffect] map 未初始化，无法应用特效')
+      return
+    }
+
     this.setView({
       pitch: 55,
       zoom: 13
     })
     console.log('[MassivePointsEffect] 调整地图视角为 3D 模式')
 
-    const Loca = (window as any).Loca
+    const Loca = (window as any).Loca // eslint-disable-line @typescript-eslint/no-explicit-any
 
     // 创建多条连接线条
     const lineCount = 200
@@ -34,10 +60,12 @@ export class MassivePointsEffect extends BaseEffect {
 
     const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#F39C12', '#9B59B6']
 
-    const geoData = {
+    const geoData: GeoData = {
       type: 'FeatureCollection',
       features: []
     }
+
+    const features: Feature[] = []
 
     // 从每个中心点生成多条辐射线条
     centerPoints.forEach((center, centerIdx) => {
@@ -51,7 +79,7 @@ export class MassivePointsEffect extends BaseEffect {
 
         const height = distance * 300000 + Math.random() * 100000
 
-        geoData.features.push({
+        features.push({
           type: 'Feature',
           properties: {
             color: colors[centerIdx],
@@ -71,7 +99,7 @@ export class MassivePointsEffect extends BaseEffect {
       const endX = startX + 0.02 + Math.random() * 0.03
       const y = 39.87923 + Math.random() * 0.08
 
-      geoData.features.push({
+      features.push({
         type: 'Feature',
         properties: {
           color: '#2ECC71',
@@ -86,6 +114,8 @@ export class MassivePointsEffect extends BaseEffect {
         }
       })
     }
+
+    geoData.features = features
 
     console.log('[MassivePointsEffect] 海量线条网格数据:', geoData)
 
@@ -102,15 +132,17 @@ export class MassivePointsEffect extends BaseEffect {
     })
     console.log('[MassivePointsEffect] 创建 GeoJSONSource:', geoSource)
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
     layer.setSource(geoSource)
     console.log('[MassivePointsEffect] 设置数据源完成')
 
     layer.setStyle({
-      lineColors: (index: number, feat: any) => {
+      lineColors: (_index: number, feat: { properties?: FeatureProperties }) => {
         const color = feat.properties?.color || '#4ECDC4'
         return [color, color]
       },
-      height: (index: number, feat: any) => {
+      height: (_index: number, feat: { properties?: FeatureProperties }) => {
         return feat.properties?.height || 50000
       },
       lineWidth: 300,
@@ -118,7 +150,7 @@ export class MassivePointsEffect extends BaseEffect {
     })
     console.log('[MassivePointsEffect] 设置样式完成')
 
-    this.loca.add(layer)
+    this.addLocaLayer(layer)
     this.setResult({ layer })
     console.log('[MassivePointsEffect] 海量线条网格图层已添加到 loca')
 

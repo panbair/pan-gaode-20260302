@@ -4,17 +4,24 @@
  */
 
 import type { EffectContext, EffectResult } from './types'
+import { logger } from '../logger'
+import { PerformanceMonitor } from '../performanceMonitor'
 
 export abstract class BaseEffect {
   protected map: any
   protected loca: any
   protected AMap: any
   protected result: EffectResult = {}
+  protected locaLayers: any[] = []
+  protected performanceMonitor: PerformanceMonitor
+  protected log: ReturnType<typeof logger.child>
 
   constructor(context: EffectContext) {
     this.map = context.map
     this.loca = context.loca
     this.AMap = context.AMap
+    this.performanceMonitor = PerformanceMonitor.getInstance()
+    this.log = logger.child(this.constructor.name)
   }
 
   /**
@@ -26,95 +33,89 @@ export abstract class BaseEffect {
    * 清除特效
    */
   cleanup(): void {
-    // 清理 markers
-    if (this.result.markers) {
-      this.result.markers.forEach((marker: any) => {
-        if (marker.stopMove) marker.stopMove()
-        if (marker.setMap) marker.setMap(null)
-      })
-    }
+    try {
+      this.log.debug('开始清理特效')
 
-    // 清理 polylines
-    if (this.result.polylines) {
-      this.result.polylines.forEach((polyline: any) => {
-        if (polyline.setMap) polyline.setMap(null)
-      })
-    }
-
-    // 清理 passedPolylines
-    if (this.result.passedPolylines) {
-      this.result.passedPolylines.forEach((polyline: any) => {
-        if (polyline.setMap) polyline.setMap(null)
-      })
-    }
-
-    // 清理 layer
-    if (this.result.layer) {
-      if (this.result.layer.destroy) this.result.layer.destroy()
-      if (this.result.layer.setMap) this.result.layer.setMap(null)
-    }
-
-    // 清理 sunRays
-    if (this.result.sunRays) {
-      if (this.result.sunRays.destroy) this.result.sunRays.destroy()
-    }
-
-    // 清理 sunParticles
-    if (this.result.sunParticles) {
-      if (this.result.sunParticles.destroy) this.result.sunParticles.destroy()
-    }
-
-    // 清理 floatingParticles
-    if (this.result.floatingParticles) {
-      if (this.result.floatingParticles.destroy) this.result.floatingParticles.destroy()
-    }
-
-    // 清理 warmCircles
-    if (this.result.warmCircles) {
-      if (this.result.warmCircles.destroy) this.result.warmCircles.destroy()
-    }
-
-    // 清理 moon
-    if (this.result.moon) {
-      if (this.result.moon.destroy) this.result.moon.destroy()
-    }
-
-    // 清理 moonGlow
-    if (this.result.moonGlow) {
-      if (this.result.moonGlow.destroy) this.result.moonGlow.destroy()
-    }
-
-    // 清理 stars
-    if (this.result.stars) {
-      if (this.result.stars.destroy) this.result.stars.destroy()
-    }
-
-    // 清理 cluster (MarkerCluster)
-    if (this.result.cluster) {
-      if (this.result.cluster.setData) {
-        this.result.cluster.setData([])
-        this.result.cluster.setMap(null)
+      // 先停止 Loca 动画，防止渲染循环访问已释放的资源
+      if (this.loca && this.loca.animate) {
+        try {
+          this.loca.animate.stop()
+        } catch (e) {
+          // 静默处理
+        }
       }
-    }
 
-    // 清理 fireflies
-    if (this.result.fireflies) {
-      if (this.result.fireflies.destroy) this.result.fireflies.destroy()
-    }
+      // 清理所有注册的 Loca 图层
+      for (const layer of this.locaLayers) {
+        if (layer) {
+          try {
+            if (layer.setData) {
+              layer.setData([])
+            }
+            if (this.loca && this.loca.remove) {
+              this.loca.remove(layer)
+            }
+          } catch (e) {
+            // 静默处理
+          }
+        }
+      }
+      this.locaLayers = []
 
-    // 清理 layers 数组
-    if (this.result.layers) {
-      this.result.layers.forEach((layer: any) => {
-        if (layer.destroy) layer.destroy()
-      })
-    }
+      const resultKeys = Object.keys(this.result)
 
-    // 自定义清理函数
-    if (this.result.cleanup) {
-      this.result.cleanup()
-    }
+      for (const key of resultKeys) {
+        const value = this.result[key]
 
-    this.result = {}
+        if (Array.isArray(value)) {
+          value.forEach((item: any) => {
+            this.safeCleanup(item)
+          })
+        } else {
+          this.safeCleanup(value)
+        }
+      }
+
+      if (this.result.cleanup && typeof this.result.cleanup === 'function') {
+        this.result.cleanup()
+      }
+
+      this.result = {}
+      this.performanceMonitor.decrementEffectCount()
+
+      this.log.debug('特效清理完成')
+    } catch (error) {
+      this.log.error('清理特效时出错:', error)
+    }
+  }
+
+  private safeCleanup(item: any): void {
+    if (!item) return
+
+    try {
+      // 先停止移动动画
+      if (item.stopMove && typeof item.stopMove === 'function') {
+        item.stopMove()
+      }
+      // 对于 Loca 层，先清空数据再移除地图
+      if (item.setData && typeof item.setData === 'function') {
+        item.setData([])
+      }
+      // 从地图移除（在 setData 之后）
+      if (item.setMap && typeof item.setMap === 'function') {
+        item.setMap(null)
+      }
+      // 销毁对象
+      if (item.destroy && typeof item.destroy === 'function') {
+        item.destroy()
+      }
+      // 最后尝试移除（避免重复调用 setMap）
+      if (item.remove && typeof item.remove === 'function' && !item.setMap) {
+        item.remove()
+      }
+    } catch (error) {
+      // 静默处理清理错误，避免干扰用户体验
+    }
   }
 
   /**
@@ -140,9 +141,42 @@ export abstract class BaseEffect {
     rotation?: number
     center?: [number, number]
   }): void {
-    if (options.zoom) this.map.setZoom(options.zoom)
-    if (options.pitch !== undefined) this.map.setPitch(options.pitch)
-    if (options.rotation !== undefined) this.map.setRotation(options.rotation)
-    if (options.center) this.map.setCenter(options.center)
+    try {
+      if (options.zoom) this.map.setZoom(options.zoom)
+      if (options.pitch !== undefined) this.map.setPitch(options.pitch)
+      if (options.rotation !== undefined) this.map.setRotation(options.rotation)
+      if (options.center) this.map.setCenter(options.center)
+    } catch (error) {
+      console.error('[BaseEffect] 设置视角失败:', error)
+    }
+  }
+
+  /**
+   * 检查 Loca 是否可用
+   */
+  protected isLocaAvailable(): boolean {
+    return !!this.loca && typeof this.loca.add === 'function'
+  }
+
+  /**
+   * 检查地图是否可用
+   */
+  protected isMapAvailable(): boolean {
+    return !!this.map && typeof this.map.setZoom === 'function'
+  }
+
+  /**
+   * 添加 Loca 图层并注册到清理列表
+   */
+  protected addLocaLayer(layer: any): void {
+    if (this.loca && layer) {
+      try {
+        this.loca.add(layer)
+        this.locaLayers.push(layer)
+        this.performanceMonitor.incrementEffectCount()
+      } catch (error) {
+        this.log.error('添加 Loca 图层失败:', error)
+      }
+    }
   }
 }

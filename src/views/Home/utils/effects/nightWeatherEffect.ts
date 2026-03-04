@@ -42,9 +42,9 @@ export class NightWeatherEffect extends BaseEffect {
     const cityLights = this.createCityLights()
 
     // 添加所有图层
-    if (stars) this.loca.add(stars)
-    if (moon) this.loca.add(moon)
-    if (cityLights) this.loca.add(cityLights)
+    if (stars) this.addLocaLayer(stars)
+    if (moon) this.addLocaLayer(moon)
+    if (cityLights) this.addLocaLayer(cityLights)
 
     this.setResult({
       stars,

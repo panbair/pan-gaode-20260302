@@ -23,6 +23,7 @@ export interface Category {
 }
 
 export const CATEGORIES: Category[] = [
+  { label: '全部', value: 'all' },
   { label: '标记', value: 'marker' },
   { label: '路径', value: 'path' },
   { label: '区域', value: 'area' },

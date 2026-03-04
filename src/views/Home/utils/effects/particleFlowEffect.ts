@@ -9,12 +9,16 @@ export class ParticleFlowEffect extends BaseEffect {
   apply(): void {
     console.log('[ParticleFlowEffect] 开始应用粒子流特效')
 
-    if (!this.loca) {
+    if (!this.isLocaAvailable()) {
       console.warn('[ParticleFlowEffect] loca 未初始化，无法应用特效')
       return
     }
 
-    // 设置3D视角 - 倾斜角度大一些,增强3D效果
+    if (!this.isMapAvailable()) {
+      console.warn('[ParticleFlowEffect] map 未初始化，无法应用特效')
+      return
+    }
+
     this.setView({
       pitch: 50,
       zoom: 11.5
@@ -99,7 +103,7 @@ export class ParticleFlowEffect extends BaseEffect {
 
     // 添加所有图层
     layers.forEach((layer, index) => {
-      this.loca.add(layer)
+      this.addLocaLayer(layer)
       console.log(`[ParticleFlowEffect] 第${index + 1}层粒子流已添加`)
     })
 

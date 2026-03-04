@@ -10,7 +10,8 @@ import {
   Moon,
   Operation,
   Location,
-  LocationFilled
+  LocationFilled,
+  Document
 } from '@element-plus/icons-vue'
 
 export const EFFECTS_LIST: MapEffect[] = [
@@ -210,5 +211,33 @@ map.setWeather({
   type: 'rain',
   intensity: 0.5
 });`
+  },
+  {
+    id: 13,
+    name: '文字标注',
+    description: '高性能文字图层，支持碰撞检测',
+    category: 'marker',
+    difficulty: '初级',
+    icon: markRaw(Document),
+    apiVersion: '2.0 + Loca',
+    codeExample: `// 文字标注
+const labelLayer = new AMap.LabelsLayer({
+  rejectMapMask: true,
+  collision: true,
+  animation: true
+});
+const label = new AMap.LabelMarker({
+  name: '标注',
+  position: [116.397428, 39.90923],
+  text: {
+    content: '标注内容',
+    style: {
+      fontSize: 14,
+      fillColor: '#fff'
+    }
+  }
+});
+labelLayer.add(label);
+map.add(labelLayer);`
   }
 ]

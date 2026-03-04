@@ -18,6 +18,7 @@ import { FlightPathEffect } from './flightPathEffect'
 import { AreaCoverageEffect } from './areaCoverageEffect'
 import { MassivePointsEffect } from './massivePointsEffect'
 import { RainSnowWeatherEffect } from './rainSnowWeatherEffect'
+import { LabelsLayerEffect } from './labelsLayerEffect'
 
 export class EffectFactory {
   private static effectClasses: Record<number, new (context: EffectContext) => BaseEffect> = {
@@ -32,7 +33,8 @@ export class EffectFactory {
     9: FlightPathEffect,
     10: AreaCoverageEffect,
     11: MassivePointsEffect,
-    12: RainSnowWeatherEffect
+    12: RainSnowWeatherEffect,
+    13: LabelsLayerEffect
   }
 
   /**
@@ -52,5 +54,19 @@ export class EffectFactory {
    */
   static getAvailableEffectIds(): number[] {
     return Object.keys(this.effectClasses).map(Number)
+  }
+
+  /**
+   * 注册新特效
+   */
+  static register(effectId: number, effectClass: new (context: EffectContext) => BaseEffect): void {
+    this.effectClasses[effectId] = effectClass
+  }
+
+  /**
+   * 批量注册特效
+   */
+  static registerBatch(effects: Record<number, new (context: EffectContext) => BaseEffect>): void {
+    Object.assign(this.effectClasses, effects)
   }
 }

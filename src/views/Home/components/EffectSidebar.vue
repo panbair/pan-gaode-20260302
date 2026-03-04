@@ -94,14 +94,13 @@ interface Emits {
 }
 
 defineProps<Props>()
-defineEmits<Emits>()
+const emit = defineEmits<Emits>()
 
 function getDifficultyType(difficulty: string): string {
   return DIFFICULTY_TYPES[difficulty] || ''
 }
 
 function handleTabChange(name: string): void {
-  const emit = defineEmits<Emits>()
   emit('update:activeCategory', name)
 }
 </script>

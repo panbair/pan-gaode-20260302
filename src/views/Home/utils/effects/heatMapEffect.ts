@@ -91,7 +91,7 @@ export class HeatMapEffect extends BaseEffect {
     })
     console.log('[HeatMapEffect] 设置样式完成')
 
-    this.loca.add(layer)
+    this.addLocaLayer(layer)
     this.setResult({ layer })
     console.log('[HeatMapEffect] 热力线条图层已添加到 loca')
   }

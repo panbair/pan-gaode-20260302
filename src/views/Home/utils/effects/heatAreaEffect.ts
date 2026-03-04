@@ -78,7 +78,7 @@ export class HeatAreaEffect extends BaseEffect {
       borderWidth: 2
     })
 
-    this.loca.add(layer)
+    this.addLocaLayer(layer)
 
     // 调整地图视角到最佳观察位置
     this.setView({
