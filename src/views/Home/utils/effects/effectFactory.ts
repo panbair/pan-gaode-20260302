@@ -17,7 +17,6 @@ import { MarkerClusterEffect } from './markerClusterEffect'
 import { FlightPathEffect } from './flightPathEffect'
 import { AreaCoverageEffect } from './areaCoverageEffect'
 import { MassivePointsEffect } from './massivePointsEffect'
-import { RainSnowWeatherEffect } from './rainSnowWeatherEffect'
 import { LabelsLayerEffect } from './labelsLayerEffect'
 
 export class EffectFactory {
@@ -33,8 +32,7 @@ export class EffectFactory {
     9: FlightPathEffect,
     10: AreaCoverageEffect,
     11: MassivePointsEffect,
-    12: RainSnowWeatherEffect,
-    13: LabelsLayerEffect
+    12: LabelsLayerEffect
   }
 
   /**

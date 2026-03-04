@@ -200,20 +200,6 @@ scatter.setData(data);`
   },
   {
     id: 12,
-    name: '雨雪天气',
-    description: '真实雨雪效果，可调强度',
-    category: 'weather',
-    difficulty: '中级',
-    icon: markRaw(Moon),
-    apiVersion: '2.0',
-    codeExample: `// 雨雪天气
-map.setWeather({
-  type: 'rain',
-  intensity: 0.5
-});`
-  },
-  {
-    id: 13,
     name: '文字标注',
     description: '高性能文字图层，支持碰撞检测',
     category: 'marker',

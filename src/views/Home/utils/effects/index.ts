@@ -22,7 +22,6 @@ export { MarkerClusterEffect } from './markerClusterEffect'
 export { FlightPathEffect } from './flightPathEffect'
 export { AreaCoverageEffect } from './areaCoverageEffect'
 export { MassivePointsEffect } from './massivePointsEffect'
-export { RainSnowWeatherEffect } from './rainSnowWeatherEffect'
 
 // 工厂类
 export { EffectFactory } from './effectFactory'
