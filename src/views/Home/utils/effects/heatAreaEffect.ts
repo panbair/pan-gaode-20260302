@@ -1,95 +1,59 @@
 /**
  * 3. 热力区域特效
- * 使用 Loca PointLayer 创建圆形热点区域效果
+ * 使用 AMap.Polygon 创建专业的区域覆盖效果
+ * 基于源码学习优化，使用原生 AMap API 实现更平滑的区域显示
  */
 
 import { BaseEffect } from './baseEffect'
 
 export class HeatAreaEffect extends BaseEffect {
+  private polygons: any[] = []
+
   apply(): void {
     console.log('[HeatAreaEffect] 开始应用热力区域特效')
 
-    if (!this.loca) {
-      console.warn('[HeatAreaEffect] loca 未初始化，无法应用特效')
+    if (!this.map) {
+      console.warn('[HeatAreaEffect] map 未初始化，无法应用特效')
       return
     }
 
-    const Loca = (window as any).Loca
+    const AMap = this.AMap
 
-    // 创建中心点
+    // 创建中心点（北京）
     const centerPoint = [116.397428, 39.90923]
 
-    // 生成多个圆形热点区域
-    const heatAreas = this.generateHeatAreas(centerPoint, 15)
+    // 生成多个热力区域
+    const heatAreas = this.generateHeatAreas(centerPoint, 12)
 
-    console.log('[HeatAreaEffect] 生成热力区域数据:', heatAreas)
+    console.log('[HeatAreaEffect] 生成热力区域数据:', heatAreas.length)
 
-    // 创建 GeoJSON 数据
-    const geoData = {
-      type: 'FeatureCollection',
-      features: heatAreas.map((area, index) => ({
-        type: 'Feature',
-        properties: {
-          radius: area.radius,
-          opacity: area.opacity,
-          color: area.color,
-          order: index,
-          // 添加边缘发光颜色
-          strokeColor: this.lightenColor(area.color, 40)
-        },
-        geometry: {
-          type: 'Point',
-          coordinates: area.center
-        }
-      }))
-    }
+    // 为每个区域创建多边形
+    heatAreas.forEach((area, index) => {
+      const polygon = new AMap.Polygon({
+        path: this.createCirclePath(area.center, area.radius),
+        fillColor: area.color,
+        fillOpacity: area.opacity,
+        strokeColor: this.lightenColor(area.color, 30),
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        zIndex: 10 + index,
+        bubble: true
+      })
 
-    console.log('[HeatAreaEffect] GeoJSON 数据:', geoData)
-
-    // 创建点图层
-    const layer = new Loca.PointLayer({
-      zIndex: 10,
-      opacity: 0.8,
-      visible: true,
-      zooms: [2, 22]
+      this.map.add(polygon)
+      this.polygons.push(polygon)
     })
-
-    const geoSource = new Loca.GeoJSONSource({
-      data: geoData
-    })
-
-    layer.setSource(geoSource)
-
-    layer.setStyle({
-      unit: 'meter',
-      radius: (index: number, feat: any) => {
-        return feat.properties?.radius || 3000
-      },
-      color: (index: number, feat: any) => {
-        return feat.properties?.color || '#3498db'
-      },
-      opacity: (index: number, feat: any) => {
-        return feat.properties?.opacity || 0.5
-      },
-      borderWidth: 3,
-      borderColor: (index: number, feat: any) => {
-        return feat.properties?.strokeColor || '#ffffff'
-      },
-      borderWidth: 2
-    })
-
-    this.addLocaLayer(layer)
 
     // 调整地图视角到最佳观察位置
     this.setView({
-      center: [centerPoint[0], centerPoint[1]],
+      center: centerPoint,
       zoom: 13,
-      pitch: 45
+      pitch: 50
     })
 
-    this.setResult({ layer })
+    this.setResult({ polygons: this.polygons })
 
-    console.log('[HeatAreaEffect] 热力区域特效应用完成')
+    console.log('[HeatAreaEffect] 热力区域特效应用完成，共创建', this.polygons.length, '个区域')
   }
 
   /**
@@ -100,60 +64,104 @@ export class HeatAreaEffect extends BaseEffect {
   private generateHeatAreas(center: [number, number], count: number): any[] {
     const areas: any[] = []
 
-    // 热度颜色梯度：使用更鲜艳的颜色
+    // 热度颜色梯度：使用渐变色系
     const colors = [
-      '#00d2ff', // 亮蓝色
-      '#00ff9d', // 亮绿色
-      '#ffeb3b', // 亮黄色
-      '#ff9800', // 亮橙色
-      '#ff5722'  // 亮红色
+      { color: '#00d2ff', name: '冷色' },      // 亮蓝色
+      { color: '#00ff9d', name: '清凉' },      // 亮绿色
+      { color: '#ffeb3b', name: '温和' },      // 亮黄色
+      { color: '#ff9800', name: '暖色' },      // 亮橙色
+      { color: '#ff5722', name: '热色' }        // 亮红色
     ]
 
     // 创建多个热点区域，从中心向外扩散
     for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2 + Math.random() * 0.3
-      const distance = 0.005 + Math.random() * 0.025
+      const angle = (i / count) * Math.PI * 2 + Math.random() * 0.5
+      const distance = 0.008 + Math.random() * 0.025
 
       // 越靠近中心，热度越高
-      const heatLevel = 1 - (distance / 0.03)
+      const heatLevel = 1 - (distance / 0.035)
       const colorIndex = Math.floor(heatLevel * (colors.length - 1))
-      const color = colors[Math.max(0, Math.min(colorIndex, colors.length - 1))]
+      const colorInfo = colors[Math.max(0, Math.min(colorIndex, colors.length - 1))]
 
-      // 半径和透明度根据热度调整，让热点更大更明显
-      const radius = 3000 + (1 - heatLevel) * 5000 + Math.random() * 1000
-      const opacity = 0.4 + heatLevel * 0.35 // 提高基础透明度
+      // 半径和透明度根据热度调整
+      const radius = 2500 + (1 - heatLevel) * 4000 + Math.random() * 800
+      const opacity = 0.35 + heatLevel * 0.45 // 增强透明度对比
+
+      const areaCenter = [
+        center[0] + Math.cos(angle) * distance,
+        center[1] + Math.sin(angle) * distance
+      ] as [number, number]
 
       areas.push({
-        center: [center[0] + Math.cos(angle) * distance, center[1] + Math.sin(angle) * distance],
+        center: areaCenter,
         radius: radius,
         opacity: opacity,
-        color: color
+        color: colorInfo.color,
+        level: heatLevel
       })
     }
 
-    // 添加中心最热区域（多层叠加效果）
-    areas.push({
-      center: center,
-      radius: 6000,
-      opacity: 0.3,
-      color: '#ff5722' // 大范围淡色
-    })
+    // 添加中心多层叠加热区（核心热点）
+    const coreHotspots = [
+      { radius: 7000, opacity: 0.2, color: '#ff5722' },  // 最外层淡色
+      { radius: 5000, opacity: 0.35, color: '#ff5722' }, // 外层
+      { radius: 3500, opacity: 0.5, color: '#ff9800' },  // 中层
+      { radius: 2000, opacity: 0.65, color: '#ffeb3b' }, // 内层
+      { radius: 1000, opacity: 0.8, color: '#ffffff' }    // 核心最亮
+    ]
 
-    areas.push({
-      center: center,
-      radius: 4000,
-      opacity: 0.5,
-      color: '#ff5722' // 中等范围
-    })
-
-    areas.push({
-      center: center,
-      radius: 2000,
-      opacity: 0.7,
-      color: '#ffeb3b' // 中心小范围黄色
+    coreHotspots.forEach(spot => {
+      areas.push({
+        center: center,
+        radius: spot.radius,
+        opacity: spot.opacity,
+        color: spot.color,
+        level: 1
+      })
     })
 
     return areas
+  }
+
+  /**
+   * 创建圆形路径
+   * @param center 中心点
+   * @param radius 半径（米）
+   */
+  private createCirclePath(center: [number, number], radius: number): any[] {
+    const points: any[] = []
+    const numPoints = 64 // 增加点数使圆形更平滑
+    const earthRadius = 6378137 // 地球半径（米）
+
+    for (let i = 0; i <= numPoints; i++) {
+      const angle = (i / numPoints) * 2 * Math.PI
+      const lat = center[1] + (radius / earthRadius) * (180 / Math.PI) * Math.cos(angle)
+      const lng = center[0] + (radius / earthRadius) * (180 / Math.PI) * Math.sin(angle) / Math.cos(center[1] * Math.PI / 180)
+      points.push([lng, lat])
+    }
+
+    return points
+  }
+
+  /**
+   * 清理资源
+   */
+  cleanup(): void {
+    super.cleanup()
+
+    // 清理所有多边形
+    this.polygons.forEach(polygon => {
+      if (polygon && this.map) {
+        try {
+          this.map.remove(polygon)
+        } catch (error) {
+          console.error('[HeatAreaEffect] 移除多边形失败:', error)
+        }
+      }
+    })
+
+    this.polygons = []
+    console.log('[HeatAreaEffect] 资源清理完成')
   }
 
   /**

@@ -65,35 +65,71 @@ import { Brush, ArrowDown, Location, VideoPlay } from '@element-plus/icons-vue'
 import { MapManager } from '../utils/mapManager'
 import { AnimationController } from '../utils/animationController'
 import { MAP_STYLES, PRESET_VIEWS, ANIMATION_PRESETS } from '../config/mapStyles'
+import { ElMessage } from 'element-plus'
 
 const mapManager = MapManager.getInstance()
-const map = mapManager.getMap()
-const animationController = new AnimationController((window as any).Loca)
+let animationController: AnimationController | null = null
 
 function handleStyleChange(style: string) {
-  if (map) {
-    map.setMapStyle(style)
+  const map = mapManager.getMap()
+  if (!map) {
+    ElMessage.warning('地图尚未加载完成')
+    return
   }
+
+  console.log('[MapToolbar] 切换地图样式:', style)
+  map.setMapStyle(style)
+  ElMessage.success('地图样式已更新')
 }
 
-function handleViewChange(presetKey: string) {
+async function handleViewChange(presetKey: string) {
   const preset = PRESET_VIEWS[presetKey as keyof typeof PRESET_VIEWS]
-  if (preset && animationController) {
-    animationController.animateView({
+  if (!preset) return
+
+  if (!mapManager.isMapReady() || !mapManager.isLocaReady()) {
+    ElMessage.warning('地图尚未加载完成')
+    return
+  }
+
+  try {
+    // 直接使用 mapManager 的 animateView 方法
+    await mapManager.animateView({
       center: preset.center as [number, number],
       zoom: preset.zoom,
       pitch: preset.pitch,
       rotation: 0,
       duration: 2000,
     })
+    ElMessage.success(`已切换到: ${preset.name}`)
+  } catch (error) {
+    console.error('[MapToolbar] 视角切换失败:', error)
+    ElMessage.error('视角切换失败')
   }
 }
 
-function handleAnimationChange(presetKey: string) {
+async function handleAnimationChange(presetKey: string) {
   const preset = ANIMATION_PRESETS[presetKey as keyof typeof ANIMATION_PRESETS]
-  if (preset && animationController) {
+  if (!preset) return
+
+  const map = mapManager.getMap()
+  const loca = mapManager.getLoca()
+
+  if (!map || !loca) {
+    ElMessage.warning('地图尚未加载完成')
+    return
+  }
+
+  if (!animationController) {
+    animationController = new AnimationController(loca, map)
+  }
+
+  try {
     const animations = preset.animate(null)
-    animationController.animateSequence(animations)
+    await animationController.animateSequence(animations)
+    ElMessage.success(`已播放: ${preset.name}`)
+  } catch (error) {
+    console.error('[MapToolbar] 动画播放失败:', error)
+    ElMessage.error('动画播放失败')
   }
 }
 </script>

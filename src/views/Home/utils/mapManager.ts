@@ -28,13 +28,16 @@ export class MapManager {
   /**
    * 初始化地图和 Loca
    */
-  async initialize(containerId: string, options: {
-    zoom?: number
-    center?: [number, number]
-    viewMode?: '2D' | '3D'
-    pitch?: number
-    mapStyle?: string
-  } = {}): Promise<void> {
+  async initialize(
+    containerId: string,
+    options: {
+      zoom?: number
+      center?: [number, number]
+      viewMode?: '2D' | '3D'
+      pitch?: number
+      mapStyle?: string
+    } = {}
+  ): Promise<void> {
     if (this.isInitialized) {
       return Promise.resolve()
     }
@@ -49,16 +52,21 @@ export class MapManager {
         const AMAP_KEY = import.meta.env.VITE_AMAP_KEY || '67ffe728401f177ab6267db726d099c5'
 
         window._AMapSecurityConfig = {
-          securityJsCode: AMAP_KEY,
+          securityJsCode: AMAP_KEY
         }
 
         this.AMap = await AMapLoader.load({
           key: AMAP_KEY,
           version: '2.0',
-          plugins: ['AMap.Buildings', 'AMap.MarkerCluster', 'AMap.MoveAnimation', 'AMap.LabelsLayer'],
+          plugins: [
+            'AMap.Buildings',
+            'AMap.MarkerCluster',
+            'AMap.MoveAnimation',
+            'AMap.LabelsLayer'
+          ],
           Loca: {
-            version: '2.0.0',
-          },
+            version: '2.0.0'
+          }
         })
 
         window.AMap = this.AMap
@@ -77,7 +85,7 @@ export class MapManager {
           pitchEnable: true,
           rotateEnable: true,
           doubleClickZoom: false,
-          showIndoorMap: false,
+          showIndoorMap: false
         })
 
         await new Promise<void>((resolveMap, rejectMap) => {
@@ -123,7 +131,7 @@ export class MapManager {
     return {
       map: this.map,
       loca: this.loca,
-      AMap: this.AMap,
+      AMap: this.AMap
     }
   }
 
@@ -193,56 +201,38 @@ export class MapManager {
     rotation?: number
     duration?: number
   }): Promise<void> {
-    return new Promise((resolve) => {
-      if (!this.map || !this.loca) {
+    return new Promise(resolve => {
+      if (!this.map) {
+        console.warn('[MapManager] map 未初始化')
         resolve()
         return
       }
 
-      const animateConfig: any = {}
       const duration = options.duration || 2000
 
-      if (options.center) {
-        animateConfig.center = {
-          value: options.center,
-          control: [this.map.getCenter().toArray(), options.center],
-          timing: [0.42, 0, 0.4, 1],
-          duration,
-        }
-      }
+      console.log('[MapManager] 开始视角动画:', options)
 
-      if (options.zoom !== undefined) {
-        animateConfig.zoom = {
-          value: options.zoom,
-          control: [[0, this.map.getZoom()], [1, options.zoom]],
-          timing: [0, 0, 1, 1],
-          duration,
-        }
-      }
+      try {
+        // 使用高德地图的原生动画 API
+        // panTo 实现平滑的视角移动
+        const center = options.center || this.map.getCenter().toArray()
+        const zoom = options.zoom !== undefined ? options.zoom : this.map.getZoom()
 
-      if (options.pitch !== undefined) {
-        animateConfig.pitch = {
-          value: options.pitch,
-          control: [[0, this.map.getPitch()], [1, options.pitch]],
-          timing: [0, 0, 1, 1],
-          duration,
-        }
-      }
+        this.map.panTo(center, zoom, false, duration)
 
-      if (options.rotation !== undefined) {
-        animateConfig.rotation = {
-          value: options.rotation,
-          control: [[0, this.map.getRotation()], [1, options.rotation]],
-          timing: [0, 0, 1, 1],
-          duration,
-        }
-      }
-
-      if (Object.keys(animateConfig).length > 0) {
-        this.loca.viewControl.addAnimates([animateConfig], () => {
+        // 动画完成后设置 pitch 和 rotation
+        setTimeout(() => {
+          if (options.pitch !== undefined) {
+            this.map.setPitch(options.pitch)
+          }
+          if (options.rotation !== undefined) {
+            this.map.setRotation(options.rotation)
+          }
+          console.log('[MapManager] 视角动画完成')
           resolve()
-        })
-      } else {
+        }, duration)
+      } catch (error) {
+        console.error('[MapManager] 视角动画失败:', error)
         resolve()
       }
     })
@@ -258,7 +248,7 @@ export class MapManager {
       this.setView({
         zoom: 13,
         pitch: 0,
-        rotation: 0,
+        rotation: 0
       })
     }
 

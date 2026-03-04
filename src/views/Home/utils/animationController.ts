@@ -13,13 +13,16 @@ export interface AnimationConfig {
 
 export class AnimationController {
   private loca: any
+  private map: any
   private currentAnimations: Map<string, any> = new Map()
   private isAnimating = false
   private lastAnimationTime = 0
   private animationCooldown = 100 // 动画冷却时间 (ms)
 
-  constructor(loca: any) {
+  constructor(loca: any, map?: any) {
     this.loca = loca
+    // 传入 map 或从 loca 中获取
+    this.map = map || (loca && loca.map)
   }
 
   /**
@@ -27,7 +30,8 @@ export class AnimationController {
    */
   async animateView(config: AnimationConfig): Promise<void> {
     return new Promise((resolve) => {
-      if (!this.loca) {
+      if (!this.map) {
+        console.warn('[AnimationController] map 未初始化')
         resolve()
         return
       }
@@ -40,55 +44,29 @@ export class AnimationController {
       }
       this.lastAnimationTime = now
 
-      const animateConfig: any = {}
+      console.log('[AnimationController] 执行视角动画:', config)
+
       const duration = config.duration || 2000
-      const map = this.loca.map
 
-      if (config.center) {
-        animateConfig.center = {
-          value: config.center,
-          control: [map.getCenter().toArray(), config.center],
-          timing: [0.42, 0, 0.4, 1],
-          duration,
-        }
-      }
+      try {
+        // 使用高德地图的原生动画 API
+        const center = config.center || this.map.getCenter().toArray()
+        const zoom = config.zoom !== undefined ? config.zoom : this.map.getZoom()
 
-      if (config.zoom !== undefined) {
-        animateConfig.zoom = {
-          value: config.zoom,
-          control: [[0, map.getZoom()], [1, config.zoom]],
-          timing: [0, 0, 1, 1],
-          duration,
-        }
-      }
+        this.map.panTo(center, zoom, false, duration)
 
-      if (config.pitch !== undefined) {
-        animateConfig.pitch = {
-          value: config.pitch,
-          control: [[0, map.getPitch()], [1, config.pitch]],
-          timing: [0, 0, 1, 1],
-          duration,
-        }
-      }
-
-      if (config.rotation !== undefined) {
-        animateConfig.rotation = {
-          value: config.rotation,
-          control: [[0, map.getRotation()], [1, config.rotation]],
-          timing: [0, 0, 1, 1],
-          duration,
-        }
-      }
-
-      if (Object.keys(animateConfig).length > 0) {
-        const animationId = `view-${Date.now()}`
-        this.currentAnimations.set(animationId, { config: animateConfig })
-
-        this.loca.viewControl.addAnimates([animateConfig], () => {
-          this.currentAnimations.delete(animationId)
+        setTimeout(() => {
+          if (config.pitch !== undefined) {
+            this.map.setPitch(config.pitch)
+          }
+          if (config.rotation !== undefined) {
+            this.map.setRotation(config.rotation)
+          }
+          console.log('[AnimationController] 动画完成')
           resolve()
-        })
-      } else {
+        }, duration)
+      } catch (error) {
+        console.error('[AnimationController] 动画执行失败:', error)
         resolve()
       }
     })

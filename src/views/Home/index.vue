@@ -197,7 +197,7 @@ async function initMap(): Promise<void> {
     const context = mapManager.getContext()
     effectHandler = new MapEffectHandler(context.map, context.loca, context.AMap)
 
-    animationController = new AnimationController(context.loca)
+    animationController = new AnimationController(context.loca, context.map)
 
     const map = mapManager.getMap()
     map.on('moveend', () => {
