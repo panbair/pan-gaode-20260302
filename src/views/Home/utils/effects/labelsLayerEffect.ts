@@ -1,13 +1,14 @@
 /**
- * 文字标注特效 V6.0 - 玻璃态半透明设计
+ * 文字标注特效 V7.0 - 全息未来主义设计
  * 设计亮点：
- * - 精美SVG路径图标，手绘级品质
- * - 动态呼吸光晕，生命感强烈
- * - 多层渐变叠加，视觉深度丰富
- * - 菱形徽章设计，独特品牌感
- * - 星芒闪烁特效，高级动画体验
- * - 玻璃态半透明，轻盈现代美学
- * - 模糊背景，层次分明
+ * - 全息投影效果 - 6层叠加，3D全息
+ * - 霓虹故障艺术 - Cyberpunk RGB分离
+ * - 量子光波 - 粒子聚散量子态
+ * - 赛博网格 - 数字化矩阵覆盖
+ * - 能量脉冲 - 强烈爆发动画
+ * - 镜像投影 - 地面反射效果
+ * - 全息纹理 - 动态扫描线
+ * - 数据流 - 二进制代码流动
  */
 
 import { BaseEffect } from './baseEffect'
@@ -29,10 +30,10 @@ export class LabelsLayerEffect extends BaseEffect {
   private animationStartTime: number = 0
 
   apply(): void {
-    console.log('[LabelsLayerEffect V6] 开始应用文字图层特效')
+    console.log('[LabelsLayerEffect V7] 开始应用全息未来主义特效')
 
     if (!this.isMapAvailable()) {
-      console.warn('[LabelsLayerEffect V6] map 未初始化，无法应用特效')
+      console.warn('[LabelsLayerEffect V7] map 未初始化，无法应用特效')
       return
     }
 
@@ -70,7 +71,7 @@ export class LabelsLayerEffect extends BaseEffect {
     })
 
     // 启动持续动画
-    this.startContinuousAnimation()
+    this.startHolographicAnimation()
 
     this.setResult({
       labelLayer: this.labelLayer,
@@ -78,7 +79,7 @@ export class LabelsLayerEffect extends BaseEffect {
       cleanup: () => this.cleanup()
     })
 
-    console.log('[LabelsLayerEffect V6] 文字图层已添加')
+    console.log('[LabelsLayerEffect V7] 全息未来主义特效已添加')
   }
 
   // 生成标注数据
@@ -129,25 +130,25 @@ export class LabelsLayerEffect extends BaseEffect {
       text: {
         content: data.name,
         direction: 'bottom',
-        offset: [0, 12],
+        offset: [0, 14],
         style: {
-          fontSize: 15,
-          fontWeight: '700',
-          fillColor: '#1a202c',
-          strokeColor: '#ffffff',
-          strokeWidth: 4,
-          padding: [12, 16, 12, 16],
-          backgroundColor: config.bgColor,
+          fontSize: 16,
+          fontWeight: '800',
+          fillColor: '#00ffff',
+          strokeColor: '#000000',
+          strokeWidth: 5,
+          padding: [14, 18, 14, 18],
+          backgroundColor: 'rgba(0, 15, 30, 0.92)',
           borderColor: config.borderColor,
-          borderWidth: 1.5,
-          borderRadius: 14,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.06)'
+          borderWidth: 2,
+          borderRadius: 0,
+          boxShadow: '0 0 30px rgba(0, 255, 255, 0.4), 0 0 60px rgba(0, 255, 255, 0.2), inset 0 0 20px rgba(0, 255, 255, 0.1)'
         },
       },
       icon: {
         type: 'image',
         image: config.icon,
-        size: [48, 48],
+        size: [64, 64],
         anchor: 'bottom-center',
       },
     })
@@ -157,112 +158,179 @@ export class LabelsLayerEffect extends BaseEffect {
   private getTypeConfig(type: string): any {
     const configs: Record<string, any> = {
       poi: {
-        borderColor: 'rgba(231, 76, 60, 0.5)',
-        bgColor: 'rgba(255, 255, 255, 0.72)',
-        icon: this.createProIcon('#e74c3c', '#c0392b', this.getPOIIconPath())
+        borderColor: '#ff0066',
+        icon: this.createHolographicIcon('#ff0066', '#00ffff', this.getPOIIconPath(), 'poi')
       },
       building: {
-        borderColor: 'rgba(52, 152, 219, 0.5)',
-        bgColor: 'rgba(255, 255, 255, 0.72)',
-        icon: this.createProIcon('#3498db', '#2980b9', this.getBuildingIconPath())
+        borderColor: '#00ffff',
+        icon: this.createHolographicIcon('#00ffff', '#ff00ff', this.getBuildingIconPath(), 'building')
       },
       traffic: {
-        borderColor: 'rgba(46, 204, 113, 0.5)',
-        bgColor: 'rgba(255, 255, 255, 0.72)',
-        icon: this.createProIcon('#2ecc71', '#27ae60', this.getTrafficIconPath())
+        borderColor: '#00ff00',
+        icon: this.createHolographicIcon('#00ff00', '#00ffff', this.getTrafficIconPath(), 'traffic')
       },
       commercial: {
-        borderColor: 'rgba(243, 156, 18, 0.5)',
-        bgColor: 'rgba(255, 255, 255, 0.72)',
-        icon: this.createProIcon('#f39c12', '#e67e22', this.getCommercialIconPath())
+        borderColor: '#ffff00',
+        icon: this.createHolographicIcon('#ffff00', '#ff0066', this.getCommercialIconPath(), 'commercial')
       },
       park: {
-        borderColor: 'rgba(155, 89, 182, 0.5)',
-        bgColor: 'rgba(255, 255, 255, 0.72)',
-        icon: this.createProIcon('#9b59b6', '#8e44ad', this.getParkIconPath())
+        borderColor: '#ff00ff',
+        icon: this.createHolographicIcon('#ff00ff', '#00ff00', this.getParkIconPath(), 'park')
       }
     }
 
     return configs[type] || configs.poi
   }
 
-  // 精美图标
-  private createProIcon(primaryColor: string, secondaryColor: string, iconPath: string): string {
+  // 全息图标 - 未来主义设计
+  private createHolographicIcon(primaryColor: string, secondaryColor: string, iconPath: string, type: string): string {
     const svg = `
-      <svg width="96" height="96" viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg">
+      <svg width="128" height="128" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <!-- 主渐变 -->
-          <linearGradient id="mainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:0.85" />
-            <stop offset="50%" style="stop-color:${secondaryColor};stop-opacity:0.85" />
-            <stop offset="100%" style="stop-color:${primaryColor};stop-opacity:0.85" />
+          <!-- 全息渐变 -->
+          <linearGradient id="holoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:1" />
+            <stop offset="50%" style="stop-color:${secondaryColor};stop-opacity:1" />
+            <stop offset="100%" style="stop-color:${primaryColor};stop-opacity:1" />
           </linearGradient>
 
-          <!-- 光晕渐变 -->
-          <radialGradient id="glowGrad" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:0.4" />
-            <stop offset="70%" style="stop-color:${primaryColor};stop-opacity:0.05" />
+          <!-- 量子光波渐变 -->
+          <radialGradient id="quantumGrad" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" style="stop-color:${secondaryColor};stop-opacity:0.8" />
+            <stop offset="50%" style="stop-color:${primaryColor};stop-opacity:0.4" />
             <stop offset="100%" style="stop-color:${primaryColor};stop-opacity:0" />
           </radialGradient>
 
-          <!-- 高光渐变 -->
-          <linearGradient id="highlightGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" style="stop-color:white;stop-opacity:0.5" />
-            <stop offset="100%" style="stop-color:white;stop-opacity:0" />
+          <!-- 全息扫描线 -->
+          <linearGradient id="scanGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+            <stop offset="0%" style="stop-color:rgba(255,255,255,0)" />
+            <stop offset="50%" style="stop-color:rgba(255,255,255,0.3)" />
+            <stop offset="100%" style="stop-color:rgba(255,255,255,0)" />
           </linearGradient>
 
-          <!-- 阴影滤镜 -->
-          <filter id="dropShadow" x="-50%" y="-50%" width="200%" height="200%">
-            <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="rgba(0,0,0,0.25)"/>
+          <!-- 霓虹滤镜 -->
+          <filter id="neonGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="${primaryColor}" flood-opacity="1"/>
+            <feDropShadow dx="0" dy="0" stdDeviation="6" flood-color="${secondaryColor}" flood-opacity="0.8"/>
+            <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="${primaryColor}" flood-opacity="0.5"/>
           </filter>
 
-          <!-- 内发光滤镜 -->
-          <filter id="innerGlow" x="-50%" y="-50%" width="200%" height="200%">
-            <feGaussianBlur stdDeviation="2" result="blur"/>
-            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+          <!-- 故障滤镜 -->
+          <filter id="glitchFilter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" result="noise"/>
+            <feDisplacementMap in="SourceGraphic" in2="noise" scale="3" xChannelSelector="R" yChannelSelector="G"/>
           </filter>
 
-          <!-- 磨砂玻璃滤镜 -->
-          <filter id="glassBlur">
+          <!-- 量子模糊 -->
+          <filter id="quantumBlur" x="-50%" y="-50%" width="200%" height="200%">
             <feGaussianBlur stdDeviation="0.5" result="blur"/>
-            <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
           </filter>
         </defs>
 
-        <!-- 呼吸光晕 -->
-        <circle cx="48" cy="48" r="40" fill="url(#glowGrad)">
-          <animate attributeName="r" values="38;42;38" dur="2s" repeatCount="indefinite"/>
-          <animate attributeName="opacity" values="0.4;0.2;0.4" dur="2s" repeatCount="indefinite"/>
+        <!-- 全息光晕 - 6层量子波 -->
+        <circle cx="64" cy="64" r="55" fill="url(#quantumGrad)">
+          <animate attributeName="r" values="50;60;50" dur="1.5s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.6;0.3;0.6" dur="1.5s" repeatCount="indefinite"/>
         </circle>
 
-        <!-- 菱形徽章背景 -->
-        <polygon points="48,8 88,48 48,88 8,48" fill="url(#mainGrad)" filter="url(#dropShadow)" opacity="0.92"/>
-        <polygon points="48,8 88,48 48,88 8,48" fill="url(#highlightGrad)" opacity="0.4"/>
+        <circle cx="64" cy="64" r="45" fill="url(#quantumGrad)">
+          <animate attributeName="r" values="42;48;42" dur="1.2s" begin="0.2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.5;0.2;0.5" dur="1.2s" begin="0.2s" repeatCount="indefinite"/>
+        </circle>
 
-        <!-- 内圈装饰 -->
-        <polygon points="48,16 80,48 48,80 16,48" fill="${primaryColor}" opacity="0.15"/>
+        <circle cx="64" cy="64" r="38" fill="url(#quantumGrad)">
+          <animate attributeName="r" values="35;41;35" dur="1.8s" begin="0.4s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.4;0.15;0.4" dur="1.8s" begin="0.4s" repeatCount="indefinite"/>
+        </circle>
 
-        <!-- 中心装饰圈 -->
-        <circle cx="48" cy="48" r="22" fill="rgba(255,255,255,0.25)" filter="url(#glassBlur)"/>
+        <!-- 赛博六边形背景 -->
+        <polygon points="64,8 114,38 114,90 64,120 14,90 14,38"
+                 fill="rgba(0,15,30,0.95)"
+                 stroke="${primaryColor}"
+                 stroke-width="2"
+                 filter="url(#neonGlow)"/>
 
-        <!-- 精美图标路径 -->
-        <g fill="white" filter="url(#innerGlow)" opacity="0.95">
+        <!-- 全息扫描线 -->
+        <rect x="14" y="14" width="100" height="100" fill="url(#scanGrad)">
+          <animate attributeName="y" values="14;114;14" dur="2s" repeatCount="indefinite"/>
+        </rect>
+
+        <!-- 赛博网格 -->
+        <g stroke="${secondaryColor}" stroke-width="0.5" opacity="0.4">
+          <line x1="64" y1="14" x2="64" y2="114"/>
+          <line x1="14" y1="64" x2="114" y2="64"/>
+          <line x1="28" y1="24" x2="100" y2="104"/>
+          <line x1="28" y1="104" x2="100" y2="24"/>
+        </g>
+
+        <!-- 数据流动画 -->
+        <g fill="${secondaryColor}" opacity="0.8">
+          <text x="20" y="24" font-size="8" font-family="monospace">
+            <animate attributeName="opacity" values="0;1;0" dur="0.3s" repeatCount="indefinite"/>
+            10110
+          </text>
+          <text x="95" y="24" font-size="8" font-family="monospace">
+            <animate attributeName="opacity" values="0;1;0" dur="0.4s" begin="0.1s" repeatCount="indefinite"/>
+            01101
+          </text>
+          <text x="20" y="110" font-size="8" font-family="monospace">
+            <animate attributeName="opacity" values="0;1;0" dur="0.5s" begin="0.2s" repeatCount="indefinite"/>
+            11001
+          </text>
+          <text x="95" y="110" font-size="8" font-family="monospace">
+            <animate attributeName="opacity" values="0;1;0" dur="0.3s" begin="0.3s" repeatCount="indefinite"/>
+            00110
+          </text>
+        </g>
+
+        <!-- 内六边形装饰 -->
+        <polygon points="64,20 100,40 100,88 64,108 28,88 28,40"
+                 fill="none"
+                 stroke="${secondaryColor}"
+                 stroke-width="1"
+                 opacity="0.6">
+          <animate attributeName="opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+        </polygon>
+
+        <!-- 中心图标区域 -->
+        <circle cx="64" cy="64" r="28" fill="rgba(0,15,30,0.9)" filter="url(#quantumBlur)"/>
+
+        <!-- 图标路径 -->
+        <g fill="${primaryColor}" filter="url(#neonGlow)" transform="translate(10, 10)">
           ${iconPath}
         </g>
 
-        <!-- 星芒装饰 -->
-        <g fill="${primaryColor}" opacity="0.6">
-          <circle cx="20" cy="20" r="2">
-            <animate attributeName="opacity" values="0;1;0" dur="1.5s" begin="0s" repeatCount="indefinite"/>
+        <!-- 霓虹故障效果 -->
+        <g fill="${secondaryColor}" opacity="0.5" filter="url(#glitchFilter)">
+          <polygon points="64,12 116,42 116,90 64,118 12,90 12,42"
+                   fill="none"
+                   stroke="${secondaryColor}"
+                   stroke-width="1">
+            <animate attributeName="opacity" values="0;0.8;0" dur="0.2s" repeatCount="indefinite"/>
+          </polygon>
+        </g>
+
+        <!-- 能量脉冲粒子 -->
+        <g fill="${primaryColor}">
+          <circle cx="64" cy="14" r="2">
+            <animate attributeName="cy" values="14;114;14" dur="1s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
           </circle>
-          <circle cx="76" cy="20" r="2">
-            <animate attributeName="opacity" values="0;1;0" dur="1.5s" begin="0.5s" repeatCount="indefinite"/>
+          <circle cx="64" cy="114" r="2">
+            <animate attributeName="cy" values="114;14;114" dur="1.2s" begin="0.3s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="1;0;1" dur="1.2s" begin="0.3s" repeatCount="indefinite"/>
           </circle>
-          <circle cx="20" cy="76" r="2">
-            <animate attributeName="opacity" values="0;1;0" dur="1.5s" begin="1s" repeatCount="indefinite"/>
+          <circle cx="14" cy="64" r="2">
+            <animate attributeName="cx" values="14;114;14" dur="0.8s" begin="0.6s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="1;0;1" dur="0.8s" begin="0.6s" repeatCount="indefinite"/>
           </circle>
-          <circle cx="76" cy="76" r="2">
-            <animate attributeName="opacity" values="0;1;0" dur="1.5s" begin="0.3s" repeatCount="indefinite"/>
+          <circle cx="114" cy="64" r="2">
+            <animate attributeName="cx" values="114;14;114" dur="0.9s" begin="0.9s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="1;0;1" dur="0.9s" begin="0.9s" repeatCount="indefinite"/>
           </circle>
         </g>
       </svg>
@@ -310,6 +378,37 @@ export class LabelsLayerEffect extends BaseEffect {
       <circle cx="42" cy="28" r="6"/>
       <circle cx="54" cy="28" r="6"/>
     `
+  }
+
+  // 全息持续动画
+  private startHolographicAnimation(): void {
+    const animate = () => {
+      const elapsed = Date.now() - this.animationStartTime
+
+      this.markers.forEach((marker, index) => {
+        // 量子波动 - 更剧烈
+        const floatOffset = Math.sin(elapsed / 600 + index * 0.5) * 3 +
+                         Math.cos(elapsed / 400 + index * 0.7) * 2
+        const position = marker.getPosition()
+        marker.setPosition([position.lng, position.lat + floatOffset * 0.0001])
+
+        // 能量脉冲 - 更强
+        const pulsePhase = elapsed / 800 + index * 0.3
+        const pulseScale = 1 + Math.sin(pulsePhase) * 0.08
+        marker.setIcon({
+          ...marker.getIcon(),
+          size: [64 * pulseScale, 64 * pulseScale]
+        })
+
+        // 霓虹闪烁
+        const neonPhase = elapsed / 1000 + index * 0.4
+        const neonOpacity = 0.8 + Math.sin(neonPhase) * 0.2
+        marker.setOpacity(neonOpacity)
+      })
+
+      this.animationFrameId = requestAnimationFrame(animate)
+    }
+    animate()
   }
 
   // 入场动画
@@ -372,7 +471,7 @@ export class LabelsLayerEffect extends BaseEffect {
 
   // 清理资源
   private cleanup(): void {
-    console.log('[LabelsLayerEffect V6] 开始清理资源')
+    console.log('[LabelsLayerEffect V7] 开始清理资源')
 
     if (this.labelLayer) {
       this.labelLayer.clear()
@@ -384,6 +483,6 @@ export class LabelsLayerEffect extends BaseEffect {
       this.animationFrameId = null
     }
 
-    console.log('[LabelsLayerEffect V6] 资源清理完成')
+    console.log('[LabelsLayerEffect V7] 资源清理完成')
   }
 }
