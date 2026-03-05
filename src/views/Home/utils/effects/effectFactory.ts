@@ -10,6 +10,7 @@ import { RunningPathEffect } from './runningPathEffect'
 import { HeatAreaEffect } from './heatAreaEffect'
 import { HeatMapEffect } from './heatMapEffect'
 import { Buildings3DEffect } from './buildings3DEffect'
+import { Heatmap3DEffect } from './heatmap3DEffect'
 import { ParticleFlowEffect } from './particleFlowEffect'
 import { SunnyWeatherEffect } from './sunnyWeatherEffect'
 import { NightWeatherEffect } from './nightWeatherEffect'
@@ -32,7 +33,8 @@ export class EffectFactory {
     9: FlightPathEffect,
     10: AreaCoverageEffect,
     11: MassivePointsEffect,
-    12: LabelsLayerEffect
+    12: LabelsLayerEffect,
+    13: Heatmap3DEffect
   }
 
   /**

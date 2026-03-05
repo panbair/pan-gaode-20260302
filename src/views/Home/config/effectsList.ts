@@ -11,7 +11,8 @@ import {
   Operation,
   Location,
   LocationFilled,
-  Document
+  Document,
+  Warning
 } from '@element-plus/icons-vue'
 
 export const EFFECTS_LIST: MapEffect[] = [
@@ -79,6 +80,27 @@ const map = new AMap.Map('container', {
   viewMode: '3D',
   pitch: 50,
   showBuildingBlock: true
+});`
+  },
+  {
+    id: 13,
+    name: '3D热力图',
+    description: '3D立体热力图，高度映射热度',
+    category: 'area',
+    difficulty: '高级',
+    icon: markRaw(Warning),
+    apiVersion: '2.0',
+    codeExample: `// 3D热力图
+const heatmap = new AMap.HeatMap(map, {
+  '3d': {
+    heightBezier: [0.4, 0.2, 0.4, 0.8],
+    gridSize: 2,
+    heightScale: 1
+  }
+});
+heatmap.setDataSet({
+  data: heatmapData,
+  max: 100
 });`
   },
   {

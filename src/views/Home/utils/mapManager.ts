@@ -74,7 +74,8 @@ export class MapManager {
             'AMap.LabelsLayer',
             'AMap.PlaceSearch',
             'AMap.InfoWindow',
-            'AMap.MouseTool'
+            'AMap.MouseTool',
+            'AMap.HeatMap'
           ],
           Loca: {
             version: '2.0.0'
