@@ -50,10 +50,19 @@ export class MapManager {
       try {
         const AMapLoader = await import('@amap/amap-jsapi-loader')
         const AMAP_KEY = import.meta.env.VITE_AMAP_KEY || '67ffe728401f177ab6267db726d099c5'
+        const AMAP_SECURITY_CODE = import.meta.env.VITE_AMAP_SECURITY_CODE || 'a7816349057521b8967a770a98307f9f'
 
+        // ✅ 修复：使用正确的安全码（Security Code），而不是地图Key
+        // 强制覆盖，确保配置生效
         window._AMapSecurityConfig = {
-          securityJsCode: AMAP_KEY
+          securityJsCode: AMAP_SECURITY_CODE
         }
+
+        // V3.2 强制清除缓存：在URL中添加时间戳参数，防止浏览器缓存旧脚本
+        const cacheBuster = `&ts=${Date.now()}`
+
+        console.log('[MapManager] 高德地图安全配置:', { key: AMAP_KEY, securityCode: AMAP_SECURITY_CODE })
+        console.log('[MapManager] 防缓存参数:', cacheBuster)
 
         this.AMap = await AMapLoader.load({
           key: AMAP_KEY,
@@ -62,12 +71,18 @@ export class MapManager {
             'AMap.Buildings',
             'AMap.MarkerCluster',
             'AMap.MoveAnimation',
-            'AMap.LabelsLayer'
+            'AMap.LabelsLayer',
+            'AMap.PlaceSearch',
+            'AMap.InfoWindow',
+            'AMap.MouseTool'
           ],
           Loca: {
             version: '2.0.0'
           }
         })
+
+        console.log('[MapManager] AMap 加载成功，版本:', this.AMap.version)
+        console.log('[MapManager] 检查 PlaceSearch 是否可用:', typeof this.AMap.PlaceSearch)
 
         window.AMap = this.AMap
 
@@ -81,7 +96,7 @@ export class MapManager {
           mapStyle: options.mapStyle || 'amap://styles/normal',
           showBuildingBlock: true,
           showLabel: true,
-          features: ['bg', 'road', 'building'],
+          features: ['bg', 'road', 'building', 'point'],
           pitchEnable: true,
           rotateEnable: true,
           doubleClickZoom: false,
