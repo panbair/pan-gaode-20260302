@@ -11,13 +11,13 @@
       @select="handleEffectSelect"
     />
 
-    <EffectControlPanel
+<!--    <EffectControlPanel
       v-if="currentEffect && !sidebarCollapsed"
       :effect="currentEffect"
       @close="handleCloseEffect"
       @refresh="handleRefreshEffect"
       @show-code="handleShowCode"
-    />
+    />-->
 
     <MapControls :is3D="is3D" :center="currentCenter" @toggle3d="toggle3D" @reset="resetMap" />
 
@@ -100,8 +100,13 @@ function handleEffectSelect(effect: MapEffect): void {
     if (effectHandler) {
       effectHandler.clear()
     }
-    resetMap(false)
+    // 不调用 resetMap，让特效的 cleanup 处理地图状态
     return
+  }
+
+  // 切换特效时先清除旧特效
+  if (currentEffect.value && effectHandler) {
+    effectHandler.clear()
   }
 
   currentEffect.value = effect
@@ -121,7 +126,7 @@ function handleCloseEffect(): void {
   if (effectHandler) {
     effectHandler.clear()
   }
-  resetMap(false)
+  // 不调用 resetMap，让特效的 cleanup 处理地图状态
 }
 
 function handleRefreshEffect(): void {

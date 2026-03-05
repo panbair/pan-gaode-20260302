@@ -247,5 +247,32 @@ const label = new AMap.LabelMarker({
 });
 labelLayer.add(label);
 map.add(labelLayer);`
+  },
+  {
+    id: 14,
+    name: '3D柱状图',
+    description: '立体柱状图可视化，展示城市GDP和人口数据',
+    category: '3d',
+    difficulty: '高级',
+    icon: markRaw(TrendCharts),
+    apiVersion: '2.0 + Loca',
+    codeExample: `// 3D柱状图
+const prismLayer = new Loca.PrismLayer({
+  zIndex: 10,
+  opacity: 1,
+  hasSide: true
+});
+prismLayer.setSource(geoSource);
+prismLayer.setStyle({
+  unit: 'meter',
+  sideNumber: 4,
+  topColor: (index, f) => {
+    return f.properties['GDP'] > 7000 ? '#E97091' : '#2852F1';
+  },
+  height: (index, f) => {
+    return Math.sqrt(f.properties['GDP']) * 9000;
+  }
+});
+loca.add(prismLayer);`
   }
 ]

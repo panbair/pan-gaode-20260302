@@ -19,6 +19,7 @@ import { FlightPathEffect } from './flightPathEffect'
 import { AreaCoverageEffect } from './areaCoverageEffect'
 import { MassivePointsEffect } from './massivePointsEffect'
 import { LabelsLayerEffect } from './labelsLayerEffect'
+import { Prism3DEffect } from './prism3DEffect'
 
 export class EffectFactory {
   private static effectClasses: Record<number, new (context: EffectContext) => BaseEffect> = {
@@ -34,7 +35,8 @@ export class EffectFactory {
     10: AreaCoverageEffect,
     11: MassivePointsEffect,
     12: LabelsLayerEffect,
-    13: Heatmap3DEffect
+    13: Heatmap3DEffect,
+    14: Prism3DEffect
   }
 
   /**
