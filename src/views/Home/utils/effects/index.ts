@@ -22,6 +22,9 @@ export { MarkerClusterEffect } from './markerClusterEffect'
 export { FlightPathEffect } from './flightPathEffect'
 export { AreaCoverageEffect } from './areaCoverageEffect'
 export { MassivePointsEffect } from './massivePointsEffect'
+export { LabelsLayerEffect } from './labelsLayerEffect'
+export { Prism3DEffect } from './prism3DEffect'
+export { HolographicLabelEffect } from './holographicLabelEffect'
 
 // 工厂类
 export { EffectFactory } from './effectFactory'

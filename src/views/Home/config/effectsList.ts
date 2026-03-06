@@ -12,10 +12,12 @@ import {
   Location,
   LocationFilled,
   Document,
-  Warning
+  Warning,
+  Star
 } from '@element-plus/icons-vue'
 
 export const EFFECTS_LIST: MapEffect[] = [
+
   {
     id: 1,
     name: '脉冲标记',
@@ -274,5 +276,70 @@ prismLayer.setStyle({
   }
 });
 loca.add(prismLayer);`
+  },
+  {
+    id: 15,
+    name: '全息标牌',
+    description: '超酷炫全息立牌效果,立体标牌、浮动图标、呼吸光环、全息扫描线',
+    category: '3d',
+    difficulty: '高级',
+    icon: markRaw(Star),
+    apiVersion: '2.0 + Loca',
+    codeExample: `// 全息标牌
+const zMarkerLayer = new Loca.ZMarkerLayer({
+  loca: loca,
+  zIndex: 120,
+  depth: false
+});
+zMarkerLayer.setSource(geoSource);
+zMarkerLayer.setStyle({
+  content: (i, feat) => createHologramLabel(feat),
+  unit: 'meter',
+  rotation: 0,
+  alwaysFront: true,
+  size: [260, 120],
+  altitude: 0
+});
+
+// 浮动三角
+const triangleLayer = new Loca.ZMarkerLayer({
+  loca: loca,
+  zIndex: 119,
+  depth: false
+});
+triangleLayer.setSource(geoSource);
+triangleLayer.setStyle({
+  content: (i, feat) => createTriangleIcon(feat),
+  unit: 'meter',
+  alwaysFront: true,
+  size: [80, 80],
+  altitude: 25
+});
+triangleLayer.addAnimate({
+  key: 'altitude',
+  value: [0, 8],
+  random: true,
+  transform: 1500,
+  yoyo: true,
+  repeat: 999999
+});
+
+// 呼吸光环
+const scatterLayer = new Loca.ScatterLayer({
+  loca,
+  zIndex: 110,
+  opacity: 1,
+  depth: false
+});
+scatterLayer.setSource(geoSource);
+scatterLayer.setStyle({
+  unit: 'meter',
+  size: [120, 120],
+  texture: createRingTexture(),
+  altitude: 30,
+  duration: 2000,
+  animate: true
+});
+loca.add(scatterLayer);`
   }
 ]
