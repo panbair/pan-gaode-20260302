@@ -23,6 +23,7 @@ import { Prism3DEffect } from './prism3DEffect'
 import { HolographicLabelEffect } from './holographicLabelEffect'
 import { TriColorLightBuildingEffect } from './triColorLightBuildingEffect'
 import { Polygon3DHealthEffect } from './polygon3DHealthEffect'
+import { FlowMapEffect } from './flowMapEffect'
 
 export class EffectFactory {
   private static effectClasses: Record<number, new (context: EffectContext) => BaseEffect> = {
@@ -42,7 +43,8 @@ export class EffectFactory {
     14: Prism3DEffect,
     15: HolographicLabelEffect,
     16: TriColorLightBuildingEffect,
-    17: Polygon3DHealthEffect
+    17: Polygon3DHealthEffect,
+    18: FlowMapEffect
   }
 
   /**

@@ -15,7 +15,8 @@ import {
   Warning,
   Star,
   MagicStick,
-  Grid
+  Grid,
+  ArrowRight
 } from '@element-plus/icons-vue'
 
 export const EFFECTS_LIST: MapEffect[] = [
@@ -530,5 +531,106 @@ particleLayer.addAnimate({
   random: true
 });
 loca.add(particleLayer);`
+  },
+  {
+    id: 18,
+    name: '动态流向图',
+    description: '带动画箭头的流向效果，展示数据流动方向，支持单向、双向、循环流向',
+    category: 'path',
+    difficulty: '中级',
+    icon: markRaw(ArrowRight),
+    apiVersion: '2.0 + Loca',
+    codeExample: `// 动态流向图特效
+// 创建节点图层（城市点）
+const nodeLayer = new Loca.ScatterLayer({
+  zIndex: 10,
+  opacity: 1,
+  visible: true,
+  zooms: [2, 22]
+});
+nodeLayer.setSource(nodeSource);
+nodeLayer.setStyle({
+  size: (index, item) => {
+    const value = item?.properties?.value || 50;
+    return [value * 4000, value * 4000];
+  },
+  unit: 'meter',
+  texture: createNodeTexture(),
+  height: (index, item) => {
+    const value = item?.properties?.value || 50;
+    return value * 2000;
+  },
+  altitudeScale: 1,
+  shape: 'cylinder'
+});
+loca.add(nodeLayer);
+
+// 创建流向图层（带动画箭头）
+const flowLayer = new Loca.PulseLinkLayer({
+  zIndex: 20,
+  opacity: 1,
+  visible: true,
+  zooms: [2, 22]
+});
+flowLayer.setSource(flowSource);
+flowLayer.setStyle({
+  unit: 'meter',
+  dash: [20000, 10000, 20000, 10000],
+  lineWidth: (index, item) => {
+    const value = item?.properties?.value || 50;
+    return [value * 200, value * 50];
+  },
+  smoothSteps: 50,
+  height: 50000,
+  speed: (index, prop) => {
+    return (prop?.speed || 1) * 10000 + Math.random() * 5000;
+  },
+  flowLength: 100000,
+  lineColors: (index, item) => {
+    const value = item?.properties?.value || 50;
+    const colors = [
+      ['rgba(0, 255, 255, 0.8)', 'rgba(0, 150, 255, 0.3)'],
+      ['rgba(255, 100, 100, 0.8)', 'rgba(255, 50, 50, 0.3)'],
+      ['rgba(100, 255, 100, 0.8)', 'rgba(50, 200, 50, 0.3)']
+    ];
+    const colorIndex = Math.floor(value / 20) % colors.length;
+    return colors[colorIndex];
+  },
+  headColor: (index, item) => {
+    const colors = [
+      'rgba(255, 255, 255, 1)',
+      'rgba(255, 200, 200, 1)',
+      'rgba(200, 255, 200, 1)'
+    ];
+    const value = item?.properties?.value || 50;
+    const colorIndex = Math.floor(value / 20) % colors.length;
+    return colors[colorIndex];
+  },
+  trailColor: 'rgba(0, 150, 255, 0.3)',
+  maxHeightScale: 0.5,
+  lineType: 'arc'
+});
+loca.add(flowLayer);
+
+// 添加动态箭头动画
+const arrow = new AMap.Marker({
+  position: [midX, midY],
+  content: arrowSvg,
+  offset: new AMap.Pixel(-size / 2, -size / 2),
+  zIndex: 30,
+  angle: angle
+});
+
+// 箭头沿路径移动动画
+const animateArrow = () => {
+  const progress = (Date.now() / (10000 / speed)) % 1;
+  const currentX = from[0] + (to[0] - from[0]) * progress;
+  const currentY = from[1] + (to[1] - from[1]) * progress;
+  const arcHeight = 2;
+  const arcOffset = Math.sin(progress * Math.PI) * arcHeight;
+  arrow.setPosition([currentX, currentY + arcOffset]);
+  requestAnimationFrame(animateArrow);
+};
+animateArrow();`
   }
 ]
