@@ -7,20 +7,20 @@
       </h3>
       <el-button
         link
-        @click="$emit('update:collapsed', !collapsed)"
         class="collapse-btn"
         :icon="collapsed ? ArrowRight : ArrowLeft"
+        @click="$emit('update:collapsed', !collapsed)"
       />
     </div>
 
-    <div class="sidebar-content" v-if="!collapsed">
+    <div v-if="!collapsed" class="sidebar-content">
       <div class="search-box">
         <el-input
           :model-value="searchKeyword"
-          @input="$emit('update:searchKeyword', $event)"
           placeholder="搜索特效..."
           clearable
           size="small"
+          @input="$emit('update:searchKeyword', $event)"
         >
           <template #prefix>
             <el-icon><Search /></el-icon>
@@ -56,10 +56,7 @@
           <div class="effect-info">
             <div class="effect-name">{{ effect.name }}</div>
             <div class="effect-meta">
-              <el-tag
-                :type="getDifficultyType(effect.difficulty)"
-                size="small"
-              >
+              <el-tag :type="getDifficultyType(effect.difficulty)" size="small">
                 {{ effect.difficulty }}
               </el-tag>
             </div>
@@ -262,6 +259,10 @@ function handleTabChange(name: string): void {
 
       &.icon-weather {
         background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      }
+
+      &.icon-building {
+        background: linear-gradient(135deg, #eca049 0%, #daef15 100%);
       }
     }
 

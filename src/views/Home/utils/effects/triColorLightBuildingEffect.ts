@@ -1,7 +1,8 @@
 /**
- * 16. 三色灯光建筑特效
+ * 16. 三色灯光建筑特效 - 增强版
  * 基于国贸建筑区的三色点光源动画效果
  * 支持环境光、平行光和多个动态点光源
+ * 优化：增强光源强度、添加光晕效果、优化建筑材质、加速动画
  */
 
 import { BaseEffect } from './baseEffect'
@@ -12,8 +13,10 @@ declare const Loca: any
 export class TriColorLightBuildingEffect extends BaseEffect {
   private buildingLayer: any = null
   private geoDataSource: any = null
+  private glowLayer: any = null
   private lights: any[] = []
   private lightMarkers: any[] = []
+  private glowMarkers: any[] = []
   private animationFrameId: number | null = null
   private animationTime = 0
   private centerPoint: [number, number] = [116.455825, 39.916603]
@@ -56,8 +59,10 @@ export class TriColorLightBuildingEffect extends BaseEffect {
     this.setResult({
       buildingLayer: this.buildingLayer,
       geoDataSource: this.geoDataSource,
+      glowLayer: this.glowLayer,
       lights: this.lights,
       lightMarkers: this.lightMarkers,
+      glowMarkers: this.glowMarkers,
       cleanup: () => this.cleanup()
     })
 
@@ -68,40 +73,40 @@ export class TriColorLightBuildingEffect extends BaseEffect {
    * 设置地图视角
    */
   private setMapView(): void {
-    this.map.setZoomAndCenter(16, this.centerPoint)
-    this.map.setPitch(62.489)
-    this.map.setRotation(300.3)
-    this.map.setMapStyle('amap://styles/28f5f1e7774710f2d218ab9ba738b444')
+    this.map.setZoomAndCenter(16.5, this.centerPoint)
+    this.map.setPitch(65)
+    this.map.setRotation(0)
+    this.map.setMapStyle('amap://styles/dark')
   }
 
   /**
    * 创建光源
    */
   private createLights(): void {
-    // 环境光
+    // 环境光 - 深色调增强科技感
     const ambLight = {
-      intensity: 0.5,
-      color: '#fff'
+      intensity: 0.3,
+      color: '#1a1a2e'
     }
     this.loca.ambLight = ambLight
     this.lights.push(ambLight)
 
-    // 平行光1
+    // 平行光1 - 青绿色
     const dirLight1 = {
-      intensity: 0.6,
-      color: '#abffc8',
+      intensity: 0.8,
+      color: '#00ffcc',
       target: [0, 0, 0],
       position: [0, 3, 6]
     }
     this.loca.dirLight = dirLight1
     this.lights.push(dirLight1)
 
-    // 平行光2
+    // 平行光2 - 紫蓝色
     const dirLight2 = {
-      intensity: 0.6,
-      color: '#5d8cff',
+      intensity: 0.8,
+      color: '#9b59b6',
       target: [0, 0, 0],
-      position: [0, 13, 13]
+      position: [0, -3, 6]
     }
     this.lights.push(dirLight2)
 
@@ -111,12 +116,12 @@ export class TriColorLightBuildingEffect extends BaseEffect {
       imageSize: new this.AMap.Size(40, 40)
     })
 
-    // 点光源1 - 青色（中心，垂直运动）
+    // 点光源1 - 霓虹青色（中心，垂直运动）
     const pointLight1 = {
-      color: 'rgb(11,255,241)',
+      color: 'rgb(0,255,255)',
       position: [116.455825, 39.916603, 0],
-      intensity: 5,
-      distance: 500
+      intensity: 15,
+      distance: 800
     }
     this.lights.push(pointLight1)
 
@@ -128,12 +133,12 @@ export class TriColorLightBuildingEffect extends BaseEffect {
     this.map.add(marker1)
     this.lightMarkers.push(marker1)
 
-    // 点光源2 - 橙色（环形运动）
+    // 点光源2 - 霓虹橙色（环形运动）
     const pointLight2 = {
-      color: 'rgb(255,75,0)',
+      color: 'rgb(255,100,0)',
       position: [116.456598, 39.923482, 400],
-      intensity: 10,
-      distance: 1500
+      intensity: 18,
+      distance: 2000
     }
     this.lights.push(pointLight2)
 
@@ -145,12 +150,12 @@ export class TriColorLightBuildingEffect extends BaseEffect {
     this.map.add(marker2)
     this.lightMarkers.push(marker2)
 
-    // 点光源3 - 粉色（环形运动）
+    // 点光源3 - 霓虹粉色（环形运动）
     const pointLight3 = {
-      color: '#f21da7',
+      color: 'rgb(255,0,150)',
       position: [116.455546, 39.90867, 400],
-      intensity: 10,
-      distance: 1500
+      intensity: 18,
+      distance: 2000
     }
     this.lights.push(pointLight3)
 
@@ -181,15 +186,27 @@ export class TriColorLightBuildingEffect extends BaseEffect {
 
     this.buildingLayer = new LocaConstructor.PolygonLayer({
       zIndex: 120,
-      shininess: 10,
+      shininess: 30,
       hasSide: true
     })
 
     this.buildingLayer.setSource(this.geoDataSource)
     this.buildingLayer.setStyle({
-      topColor: 'rgba(16,128,165,1)',
-      sideTopColor: 'rgba(13,43,90,1)',
-      sideBottomColor: 'rgba(24,212,255,1)',
+      topColor: (index: number, feature: any) => {
+        const h = feature.properties.h || 100
+        // 根据高度渐变颜色
+        const t = Math.min(h / 500, 1)
+        return `rgba(${Math.floor(10 + t * 30)},${Math.floor(60 + t * 100)},${Math.floor(120 + t * 135)},0.9)`
+      },
+      sideTopColor: (index: number, feature: any) => {
+        return 'rgba(20,40,80,0.95)'
+      },
+      sideBottomColor: (index: number, feature: any) => {
+        const h = feature.properties.h || 100
+        // 底部渐变色，从深蓝到霓虹蓝
+        const t = Math.min(h / 400, 1)
+        return `rgba(${Math.floor(30 + t * 20)},${Math.floor(60 + t * 150)},${Math.floor(150 + t * 105)},1)`
+      },
       unit: 'meter',
       height: (index: number, feature: any) => {
         return feature.properties.h || 100
@@ -207,31 +224,45 @@ export class TriColorLightBuildingEffect extends BaseEffect {
    */
   private startAnimation(): void {
     const radius = 0.8
-    const height = 400
+    const height = 500
 
     const animate = () => {
-      this.animationTime++
+      this.animationTime += 1.5
 
-      // 计算环形运动位置
-      const pos1 = this.transformTranslate(this.centerPoint, radius, this.animationTime)
-      const pos2 = this.transformTranslate(this.centerPoint, radius, this.animationTime + 180)
+      // 计算环形运动位置 - 使用更平滑的角度变化
+      const angle1 = this.animationTime
+      const angle2 = this.animationTime + 120
+      const angle3 = this.animationTime + 240
 
-      // 更新点光源2（橙色）
-      const newPos2: [number, number, number] = [pos1[0], pos1[1], height]
-      this.lightMarkers[1].setPosition(newPos2)
-      this.loca.pointLight2.position = newPos2
+      const pos1 = this.transformTranslate(this.centerPoint, radius, angle1)
+      const pos2 = this.transformTranslate(this.centerPoint, radius, angle2)
+      const pos3 = this.transformTranslate(this.centerPoint, radius, angle3)
 
-      // 更新点光源3（粉色）
-      const newPos3: [number, number, number] = [pos2[0], pos2[1], height]
-      this.lightMarkers[2].setPosition(newPos3)
-      this.loca.pointLight3.position = newPos3
-
-      // 更新点光源1（青色，垂直运动）
-      const t = (this.animationTime * 4) % (height * 2)
+      // 更新点光源1（青色，快速垂直运动）
+      const t = (this.animationTime * 5) % (height * 2)
       const verticalHeight = t > height ? height * 2 - t : t
       const newPos1: [number, number, number] = [this.centerPoint[0], this.centerPoint[1], verticalHeight]
       this.lightMarkers[0].setPosition(newPos1)
       this.loca.pointLight.position = newPos1
+
+      // 更新点光源2（橙色，环形运动 + 垂直波动）
+      const verticalOffset2 = Math.sin(this.animationTime * 0.1) * 100
+      const newPos2: [number, number, number] = [pos1[0], pos1[1], height + verticalOffset2]
+      this.lightMarkers[1].setPosition(newPos2)
+      this.loca.pointLight2.position = newPos2
+
+      // 更新点光源3（粉色，环形运动 + 垂直波动）
+      const verticalOffset3 = Math.cos(this.animationTime * 0.1) * 100
+      const newPos3: [number, number, number] = [pos2[0], pos2[1], height + verticalOffset3]
+      this.lightMarkers[2].setPosition(newPos3)
+      this.loca.pointLight3.position = newPos3
+
+      // 动态调整光源强度（呼吸效果）
+      const intensityBase = 15
+      const intensityVariation = Math.sin(this.animationTime * 0.2) * 5
+      this.loca.pointLight.intensity = intensityBase + intensityVariation
+      this.loca.pointLight2.intensity = 18 + intensityVariation
+      this.loca.pointLight3.intensity = 18 + intensityVariation
 
       this.animationFrameId = requestAnimationFrame(animate)
     }
@@ -282,6 +313,18 @@ export class TriColorLightBuildingEffect extends BaseEffect {
       }
     })
     this.lightMarkers = []
+
+    // 移除光晕标记
+    this.glowMarkers.forEach(marker => {
+      if (marker) {
+        try {
+          this.map.remove(marker)
+        } catch (e) {
+          // 静默处理
+        }
+      }
+    })
+    this.glowMarkers = []
 
     // 清除光源配置
     if (this.loca) {

@@ -13,7 +13,8 @@ import {
   LocationFilled,
   Document,
   Warning,
-  Star
+  Star,
+  MagicStick
 } from '@element-plus/icons-vue'
 
 export const EFFECTS_LIST: MapEffect[] = [
@@ -348,7 +349,7 @@ loca.add(scatterLayer);`
     description: '三色动态点光源打造炫酷建筑效果，青色垂直运动、橙色粉色环形运动',
     category: 'building',
     difficulty: '高级',
-    icon: markRaw(Star),
+    icon: markRaw(MagicStick),
     apiVersion: '2.0 + Loca',
     codeExample: `// 三色灯光建筑特效
 // 环境光
