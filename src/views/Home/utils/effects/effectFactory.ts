@@ -21,6 +21,7 @@ import { MassivePointsEffect } from './massivePointsEffect'
 import { LabelsLayerEffect } from './labelsLayerEffect'
 import { Prism3DEffect } from './prism3DEffect'
 import { HolographicLabelEffect } from './holographicLabelEffect'
+import { TriColorLightBuildingEffect } from './triColorLightBuildingEffect'
 
 export class EffectFactory {
   private static effectClasses: Record<number, new (context: EffectContext) => BaseEffect> = {
@@ -38,7 +39,8 @@ export class EffectFactory {
     12: LabelsLayerEffect,
     13: Heatmap3DEffect,
     14: Prism3DEffect,
-    15: HolographicLabelEffect
+    15: HolographicLabelEffect,
+    16: TriColorLightBuildingEffect
   }
 
   /**

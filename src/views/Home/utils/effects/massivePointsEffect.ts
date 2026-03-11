@@ -95,23 +95,25 @@ export class MassivePointsEffect extends BaseEffect {
 
     // 延迟显示并添加动画
     setTimeout(() => {
-      this.iconLayer.show()
-      this.iconLayer.addAnimate({
-        key: 'offset',
-        value: [0, 1],
-        easing: 'Linear',
-        transform: 500,
-        random: true,
-        delay: 2000
-      })
-      this.iconLayer.addAnimate({
-        key: 'iconSize',
-        value: [0, 1],
-        easing: 'Linear',
-        transform: 500,
-        random: true,
-        delay: 2000
-      })
+      if (this.iconLayer) {
+        this.iconLayer.show()
+        this.iconLayer.addAnimate({
+          key: 'offset',
+          value: [0, 1],
+          easing: 'Linear',
+          transform: 500,
+          random: true,
+          delay: 2000
+        })
+        this.iconLayer.addAnimate({
+          key: 'iconSize',
+          value: [0, 1],
+          easing: 'Linear',
+          transform: 500,
+          random: true,
+          delay: 2000
+        })
+      }
     }, 800)
 
     // 启动动画循环

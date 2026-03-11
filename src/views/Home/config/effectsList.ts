@@ -341,5 +341,71 @@ scatterLayer.setStyle({
   animate: true
 });
 loca.add(scatterLayer);`
+  },
+  {
+    id: 16,
+    name: '三色灯光建筑',
+    description: '三色动态点光源打造炫酷建筑效果，青色垂直运动、橙色粉色环形运动',
+    category: 'building',
+    difficulty: '高级',
+    icon: markRaw(Star),
+    apiVersion: '2.0 + Loca',
+    codeExample: `// 三色灯光建筑特效
+// 环境光
+loca.ambLight = {
+  intensity: 0.5,
+  color: '#fff'
+};
+
+// 平行光
+loca.dirLight = {
+  intensity: 0.6,
+  color: '#abffc8',
+  target: [0, 0, 0],
+  position: [0, 3, 6]
+};
+
+// 点光源1 - 青色（垂直运动）
+loca.pointLight = {
+  color: 'rgb(11,255,241)',
+  position: [116.455825, 39.916603, 0],
+  intensity: 5,
+  distance: 500
+};
+
+// 点光源2 - 橙色（环形运动）
+loca.pointLight2 = {
+  color: 'rgb(255,75,0)',
+  position: [116.456598, 39.923482, 400],
+  intensity: 10,
+  distance: 1500
+};
+
+// 点光源3 - 粉色（环形运动）
+loca.pointLight3 = {
+  color: '#f21da7',
+  position: [116.455546, 39.90867, 400],
+  intensity: 10,
+  distance: 1500
+};
+
+// 建筑图层
+const pl = new Loca.PolygonLayer({
+  zIndex: 120,
+  shininess: 10,
+  hasSide: true
+});
+
+pl.setSource(geo);
+pl.setStyle({
+  topColor: 'rgba(16,128,165,1)',
+  sideTopColor: 'rgba(13,43,90,1)',
+  sideBottomColor: 'rgba(24,212,255,1)',
+  unit: 'meter',
+  height: (index, feature) => feature.properties.h,
+  altitude: 0
+});
+pl.setCustomCenter([116.458657, 39.914862]);
+loca.add(pl);`
   }
 ]

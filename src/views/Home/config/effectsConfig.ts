@@ -29,7 +29,8 @@ export const CATEGORIES: Category[] = [
   { label: '区域', value: 'area' },
   { label: '3D', value: '3d' },
   { label: '粒子', value: 'particle' },
-  { label: '天气', value: 'weather' }
+  { label: '天气', value: 'weather' },
+  { label: '建筑', value: 'building' }
 ]
 
 export const DIFFICULTY_TYPES: Record<string, string> = {

@@ -25,6 +25,7 @@ export { MassivePointsEffect } from './massivePointsEffect'
 export { LabelsLayerEffect } from './labelsLayerEffect'
 export { Prism3DEffect } from './prism3DEffect'
 export { HolographicLabelEffect } from './holographicLabelEffect'
+export { TriColorLightBuildingEffect } from './triColorLightBuildingEffect'
 
 // 工厂类
 export { EffectFactory } from './effectFactory'
