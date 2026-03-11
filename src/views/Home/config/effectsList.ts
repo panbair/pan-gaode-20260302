@@ -14,7 +14,8 @@ import {
   Document,
   Warning,
   Star,
-  MagicStick
+  MagicStick,
+  Grid
 } from '@element-plus/icons-vue'
 
 export const EFFECTS_LIST: MapEffect[] = [
@@ -408,5 +409,126 @@ pl.setStyle({
 });
 pl.setCustomCenter([116.458657, 39.914862]);
 loca.add(pl);`
+  },
+  {
+    id: 17,
+    name: '立体面健康度',
+    description: '赛博朋克风格3D立体面，炫酷光影系统、漂浮粒子、呼吸动画、霓虹边框、多重动画叠加',
+    category: '3d',
+    difficulty: '高级',
+    icon: markRaw(Grid),
+    apiVersion: '2.0 + Loca',
+    codeExample: `// 3D立体面健康度特效 - 赛博朋克版
+// 配置赛博朋克多光源光照系统
+loca.ambLight = {
+  intensity: 0.4,
+  color: 'rgba(100, 200, 255, 0.8)'
+};
+loca.dirLight = {
+  intensity: 0.8,
+  color: 'rgba(255, 200, 100, 0.9)',
+  target: [0, 0, 0],
+  position: [1, -1, 2]
+};
+loca.pointLight = {
+  color: 'rgb(100, 255, 200)',
+  position: [120.24289, 30.341335, 30000],
+  intensity: 4,
+  distance: 80000
+};
+loca.pointLight2 = {
+  color: 'rgb(255, 100, 255)',
+  position: [120.109233, 30.246411, 25000],
+  intensity: 3,
+  distance: 60000
+};
+
+// 炫酷配色 - 金色到紫色渐变
+const colors = [
+  '#FFD700', '#FFA500', '#FF69B4', '#00CED1',
+  '#00BFFF', '#4169E1', '#8A2BE2', '#9932CC', '#4B0082'
+];
+
+// 创建玻璃质感+霓虹边框的多边形
+const pl = new Loca.PolygonLayer({
+  zIndex: 120,
+  opacity: 0.75,
+  shininess: 30,
+  hasSide: true,
+  acceptLight: true,
+  cullface: 'none'
+});
+
+pl.setSource(geo);
+pl.setStyle({
+  topColor: (index, feature) => getColorByHealth(feature.properties.health),
+  sideTopColor: (index, feature) => getColorByHealth(feature.properties.health),
+  sideBottomColor: (index, feature) => darkenColor(getColorByHealth(feature.properties.health), 0.6),
+  height: (index, feature) => getHeightByHealth(feature.properties.health),
+  altitude: 0,
+  unit: 'meter'
+});
+loca.add(pl);
+
+// 多重炫酷动画
+pl.addAnimate({
+  key: 'height',
+  value: [0, 1],
+  duration: 1500,
+  easing: 'CubicInOut',
+  transform: 2000,
+  random: true
+});
+pl.addAnimate({
+  key: 'altitude',
+  value: [0, 200],
+  duration: 3000,
+  easing: 'SineInOut',
+  yoyo: true,
+  repeat: Infinity,
+  random: true
+});
+pl.addAnimate({
+  key: 'opacity',
+  value: [0.6, 0.9],
+  duration: 4000,
+  easing: 'SineInOut',
+  yoyo: true,
+  repeat: Infinity
+});
+
+// 在健康度高的区域添加漂浮粒子
+const highHealthAreas = geo.features.filter(f => f.properties.health >= 0.8);
+const particleLayer = new Loca.ScatterLayer({
+  zIndex: 130,
+  opacity: 0.8,
+  depth: false
+});
+particleLayer.setSource(particleSource);
+particleLayer.setStyle({
+  unit: 'meter',
+  size: (index, feature) => feature.properties.size,
+  color: (index, feature) => feature.properties.color,
+  altitude: (index, feature) => Math.random() * 5000 + 10000
+});
+particleLayer.addAnimate({
+  key: 'altitude',
+  value: [0, 2000],
+  duration: 3000,
+  easing: 'SineInOut',
+  yoyo: true,
+  repeat: Infinity,
+  random: true
+});
+particleLayer.addAnimate({
+  key: 'opacity',
+  value: [0.3, 1],
+  duration: 2000,
+  easing: 'SineInOut',
+  yoyo: true,
+  repeat: Infinity,
+  random: true
+});
+loca.add(particleLayer);`
   }
 ]

@@ -26,6 +26,7 @@ export { LabelsLayerEffect } from './labelsLayerEffect'
 export { Prism3DEffect } from './prism3DEffect'
 export { HolographicLabelEffect } from './holographicLabelEffect'
 export { TriColorLightBuildingEffect } from './triColorLightBuildingEffect'
+export { Polygon3DHealthEffect } from './polygon3DHealthEffect'
 
 // 工厂类
 export { EffectFactory } from './effectFactory'
