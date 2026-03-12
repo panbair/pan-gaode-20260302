@@ -868,5 +868,87 @@ particleLayer.addAnimate({
   repeat: Infinity
 });
 loca.add(particleLayer);`
+  },
+  {
+    id: 22,
+    name: '交通演变',
+    description: '展示道路/地铁网络的历史扩展过程，时间轴控制动态线路增长，多类型交通可视化',
+    category: 'data',
+    difficulty: '高级',
+    icon: markRaw(Operation),
+    apiVersion: '2.0 + Loca',
+    codeExample: `// 交通演变特效
+// 定义交通站点数据
+const trafficNodes = [
+  { id: 't1', name: '天安门', coords: [116.397428, 39.90923], type: 'metro', buildYear: 1969 },
+  { id: 't2', name: '北京站', coords: [116.42678, 39.903738], type: 'metro', buildYear: 1969 },
+  { id: 't3', name: '西单', coords: [116.374525, 39.91288], type: 'metro', buildYear: 1969 }
+];
+
+// 定义交通线路数据
+const trafficLines = [
+  {
+    id: 'l1',
+    name: '地铁1号线',
+    nodes: ['t1', 't2', 't3'],
+    type: 'metro',
+    buildYear: 1969,
+    color: '#E4002B'
+  }
+];
+
+// 创建线路图层
+const lineLayer = new Loca.LineLayer({
+  zIndex: 10,
+  opacity: 1
+});
+lineLayer.setSource(lineSource);
+lineLayer.setStyle({
+  unit: 'meter',
+  lineWidth: (index, item) => {
+    const type = item?.properties?.type;
+    return type === 'metro' ? 300 : 200;
+  },
+  lineColor: (index, item) => item?.properties?.color || '#666666',
+  altitude: 0
+});
+loca.add(lineLayer);
+
+// 创建站点图层
+const nodeLayer = new Loca.ScatterLayer({
+  zIndex: 15,
+  opacity: 1
+});
+nodeLayer.setSource(nodeSource);
+nodeLayer.setStyle({
+  unit: 'meter',
+  size: (index, item) => {
+    const type = item?.properties?.type;
+    return type === 'metro' ? 6000 : 4000;
+  },
+  texture: createNodeTexture(item?.properties?.type),
+  altitude: 100
+});
+loca.add(nodeLayer);
+
+// 时间轴控制 - 根据当前年份更新可见性
+function updateVisibilityByTime(currentTime) {
+  const features = nodeLayer.getSource().data.features;
+  features.forEach(feature => {
+    const buildYear = feature.properties.buildYear;
+    feature.properties.opacity = buildYear <= currentTime ? 1 : 0;
+  });
+  nodeLayer.getSource().setData({ type: 'FeatureCollection', features });
+}
+
+// 启动时间动画
+let currentTime = 1990;
+const animate = () => {
+  currentTime += 1;
+  if (currentTime > 2010) currentTime = 1990;
+  updateVisibilityByTime(currentTime);
+  requestAnimationFrame(animate);
+};
+animate();`
   }
 ]

@@ -27,6 +27,7 @@ import { FlowMapEffect } from './flowMapEffect'
 import { NeonCityEffect } from './neonCityEffect'
 import { BuildingFloorEffect } from './buildingFloorEffect'
 import { EconomyWaveEffect } from './economyWaveEffect'
+import { TrafficEvolutionEffect } from './trafficEvolutionEffect'
 
 console.log('[EffectFactory] BuildingFloorEffect imported:', BuildingFloorEffect)
 
@@ -52,7 +53,8 @@ export class EffectFactory {
     18: FlowMapEffect,
     19: NeonCityEffect,
     20: BuildingFloorEffect,
-    21: EconomyWaveEffect
+    21: EconomyWaveEffect,
+    22: TrafficEvolutionEffect
   }
 
   static {
