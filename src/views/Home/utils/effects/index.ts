@@ -27,6 +27,10 @@ export { Prism3DEffect } from './prism3DEffect'
 export { HolographicLabelEffect } from './holographicLabelEffect'
 export { TriColorLightBuildingEffect } from './triColorLightBuildingEffect'
 export { Polygon3DHealthEffect } from './polygon3DHealthEffect'
+export { FlowMapEffect } from './flowMapEffect'
+export { NeonCityEffect } from './neonCityEffect'
+export { BuildingFloorEffect } from './buildingFloorEffect'
+export { EconomyWaveEffect } from './economyWaveEffect'
 
 // 工厂类
 export { EffectFactory } from './effectFactory'

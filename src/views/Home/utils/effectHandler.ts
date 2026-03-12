@@ -12,6 +12,7 @@ export class MapEffectHandler {
   private currentEffect: any = null
   private AMap: any = null
   private locaLayers: any[] = []
+  private activeEffects: Map<number, any> = new Map() // 存储多个激活的特效实例
 
   constructor(map: any, loca: any, AMap: any) {
     this.map = map
@@ -20,20 +21,22 @@ export class MapEffectHandler {
   }
 
   /**
-   * 清除当前特效
+   * 清除当前特效（清除所有特效）
    */
   clear(): void {
-    console.log('[MapEffectHandler] 开始清除特效')
+    console.log('[MapEffectHandler] 开始清除所有特效')
 
-    // 清理当前特效
-    if (this.currentEffect) {
+    // 清理所有激活的特效
+    for (const [effectId, effect] of this.activeEffects.entries()) {
       try {
-        this.currentEffect.cleanup()
+        effect.cleanup()
       } catch (error) {
-        console.error('[MapEffectHandler] 清理特效时出错:', error)
+        console.error(`[MapEffectHandler] 清理特效 ID ${effectId} 时出错:`, error)
       }
-      this.currentEffect = null
     }
+
+    this.activeEffects.clear()
+    this.currentEffect = null
 
     // 停止 Loca 动画
     if (this.loca) {
@@ -84,15 +87,18 @@ export class MapEffectHandler {
       }
     }
 
-    console.log('[MapEffectHandler] 特效清除完成')
+    console.log('[MapEffectHandler] 所有特效清除完成')
   }
 
   /**
-   * 应用指定特效
+   * 应用指定特效（支持多选）
    */
   applyEffect(effectId: number): void {
-    // 先清除当前特效
-    this.clear()
+    // 检查特效是否已存在
+    if (this.activeEffects.has(effectId)) {
+      console.warn(`[MapEffectHandler] 特效 ID ${effectId} 已存在，跳过应用`)
+      return
+    }
 
     // 创建上下文
     const context: EffectContext = {
@@ -102,13 +108,63 @@ export class MapEffectHandler {
     }
 
     // 使用工厂创建特效
-    this.currentEffect = EffectFactory.create(effectId, context)
+    const effect = EffectFactory.create(effectId, context)
 
-    if (this.currentEffect) {
-      this.currentEffect.apply()
+    if (effect) {
+      try {
+        effect.apply()
+        this.activeEffects.set(effectId, effect)
+        this.currentEffect = effect // 更新当前特效为最新应用的
+        console.log(`[MapEffectHandler] 特效 ID ${effectId} 应用成功`)
+      } catch (error) {
+        console.error(`[MapEffectHandler] 应用特效 ID ${effectId} 失败:`, error)
+        throw error
+      }
     } else {
       console.warn(`[MapEffectHandler] 无法创建特效 ID: ${effectId}`)
     }
+  }
+
+  /**
+   * 清除指定特效
+   */
+  clearEffect(effectId: number): void {
+    console.log(`[MapEffectHandler] 开始清除特效 ID: ${effectId}`)
+
+    const effect = this.activeEffects.get(effectId)
+    if (!effect) {
+      console.warn(`[MapEffectHandler] 特效 ID ${effectId} 不存在`)
+      return
+    }
+
+    try {
+      effect.cleanup()
+      this.activeEffects.delete(effectId)
+
+      // 如果清除的是当前特效，更新引用
+      if (this.currentEffect === effect) {
+        this.currentEffect = null
+      }
+
+      console.log(`[MapEffectHandler] 特效 ID ${effectId} 清除成功`)
+    } catch (error) {
+      console.error(`[MapEffectHandler] 清除特效 ID ${effectId} 失败:`, error)
+      throw error
+    }
+  }
+
+  /**
+   * 检查特效是否激活
+   */
+  isEffectActive(effectId: number): boolean {
+    return this.activeEffects.has(effectId)
+  }
+
+  /**
+   * 获取所有激活的特效ID
+   */
+  getActiveEffectIds(): number[] {
+    return Array.from(this.activeEffects.keys())
   }
 
   /**

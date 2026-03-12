@@ -62,8 +62,7 @@ export class TriColorLightBuildingEffect extends BaseEffect {
       glowLayer: this.glowLayer,
       lights: this.lights,
       lightMarkers: this.lightMarkers,
-      glowMarkers: this.glowMarkers,
-      cleanup: () => this.cleanup()
+      glowMarkers: this.glowMarkers
     })
 
     console.log('[TriColorLightBuildingEffect] 三色灯光建筑特效应用完成')

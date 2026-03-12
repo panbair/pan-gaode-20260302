@@ -125,7 +125,7 @@ export class FlowMapEffect extends BaseEffect {
       nodeLayer: this.nodeLayer,
       labelLayer: this.labelLayer,
       arrowLayer: this.arrowLayer,
-      cleanup: () => this.cleanup()
+      cleanup: () => this.cleanupFlowMap()
     })
 
     console.log('[FlowMapEffect] 特效应用完成')
@@ -564,8 +564,8 @@ export class FlowMapEffect extends BaseEffect {
   }
 
   // 清理资源
-  private cleanup() {
-    console.log('[FlowMapEffect] 开始清理资源')
+  private cleanupFlowMap(): void {
+    console.log('[FlowMapEffect] 开始清理流向图资源')
 
     // 停止动画
     if (this.animationId !== null) {
@@ -581,21 +581,53 @@ export class FlowMapEffect extends BaseEffect {
 
     // 清理箭头图层
     if (this.arrowLayer) {
+      this.arrowLayer.clear()
       this.map.remove(this.arrowLayer)
     }
 
-    // 清理流向图层
-    if (this.flowLayer) {
-      this.flowLayer.setData([])
-      this.loca.remove(this.flowLayer)
+    console.log('[FlowMapEffect] 流向图资源清理完成')
+  }
+
+  protected cleanup(): void {
+    console.log('[FlowMapEffect] 开始清理资源')
+
+    // 停止动画
+    if (this.animationId !== null) {
+      cancelAnimationFrame(this.animationId)
+      this.animationId = null
     }
 
-    // 清理节点图层
-    if (this.nodeLayer) {
-      this.nodeLayer.setData([])
-      this.loca.remove(this.nodeLayer)
+    // 清理标签图层
+    if (this.labelLayer) {
+      try {
+        this.labelLayer.clear()
+        this.map.remove(this.labelLayer)
+      } catch (e) {
+        console.warn('[FlowMapEffect] 清理标签图层时出错:', e)
+      }
     }
 
+    // 清理箭头图层 - OverlayGroup 需要清空所有覆盖物再移除
+    if (this.arrowLayer) {
+      try {
+        const overlays = this.arrowLayer.getOverlays()
+        if (overlays && overlays.length > 0) {
+          overlays.forEach((overlay: any) => {
+            try {
+              this.map.remove(overlay)
+            } catch (e) {
+              // 静默处理
+            }
+          })
+        }
+        this.arrowLayer.clear()
+        this.map.remove(this.arrowLayer)
+      } catch (e) {
+        console.warn('[FlowMapEffect] 清理箭头图层时出错:', e)
+      }
+    }
+
+    super.cleanup()
     console.log('[FlowMapEffect] 资源清理完成')
   }
 }

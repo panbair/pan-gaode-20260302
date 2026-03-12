@@ -99,8 +99,7 @@ export class LabelsLayerEffect extends BaseEffect {
 
     this.setResult({
       labelLayer: this.labelLayer,
-      updateLabels: (newData: LabelData[]) => this.updateLabels(newData),
-      cleanup: () => this.cleanup()
+      updateLabels: (newData: LabelData[]) => this.updateLabels(newData)
     })
 
     console.log('[LabelsLayerEffect V8] 智能分布标注系统已启动')
@@ -564,7 +563,7 @@ export class LabelsLayerEffect extends BaseEffect {
   }
 
   // 清理资源
-  cleanup(): void {
+  protected cleanup(): void {
     console.log('[LabelsLayerEffect V7] 开始清理资源')
 
     if (this.labelLayer) {
@@ -577,6 +576,7 @@ export class LabelsLayerEffect extends BaseEffect {
       this.animationFrameId = null
     }
 
+    super.cleanup()
     console.log('[LabelsLayerEffect V7] 资源清理完成')
   }
 }

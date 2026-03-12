@@ -5,12 +5,23 @@
         <el-icon><MagicStick /></el-icon>
         地图特效库
       </h3>
-      <el-button
-        link
-        class="collapse-btn"
-        :icon="collapsed ? ArrowRight : ArrowLeft"
-        @click="$emit('update:collapsed', !collapsed)"
-      />
+      <div class="header-actions">
+        <el-button
+          v-if="activeEffects.size > 0"
+          link
+          class="close-all-btn"
+          size="small"
+          @click="$emit('closeAll')"
+        >
+          全部关闭
+        </el-button>
+        <el-button
+          link
+          class="collapse-btn"
+          :icon="collapsed ? ArrowRight : ArrowLeft"
+          @click="$emit('update:collapsed', !collapsed)"
+        />
+      </div>
     </div>
 
     <div v-if="!collapsed" class="sidebar-content">
@@ -40,12 +51,19 @@
         </el-tabs>
       </div>
 
+      <div class="effect-count" v-if="activeEffects.size > 0">
+        已激活 {{ activeEffects.size }} 个特效
+      </div>
+
       <div class="effect-list">
         <div
           v-for="effect in effects"
           :key="effect.id"
           class="effect-item"
-          :class="{ active: selectedEffect?.id === effect.id }"
+          :class="{
+            active: activeEffects.has(effect.id),
+            selected: selectedEffect?.id === effect.id
+          }"
           @click="$emit('select', effect)"
         >
           <div class="effect-icon" :class="`icon-${effect.category}`">
@@ -61,9 +79,12 @@
               </el-tag>
             </div>
           </div>
-          <el-icon v-if="selectedEffect?.id === effect.id" class="check-icon">
-            <Check />
-          </el-icon>
+          <div class="effect-status">
+            <el-icon v-if="activeEffects.has(effect.id)" class="active-icon">
+              <Check />
+            </el-icon>
+            <div v-else class="inactive-icon"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -81,6 +102,7 @@ interface Props {
   searchKeyword: string
   effects: MapEffect[]
   selectedEffect: MapEffect | null
+  activeEffects: Set<number>
 }
 
 interface Emits {
@@ -88,6 +110,7 @@ interface Emits {
   (e: 'update:activeCategory', value: string): void
   (e: 'update:searchKeyword', value: string): void
   (e: 'select', effect: MapEffect): void
+  (e: 'closeAll'): void
 }
 
 defineProps<Props>()
@@ -139,6 +162,21 @@ function handleTabChange(name: string): void {
       color: #333;
     }
 
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .close-all-btn {
+      color: #f56c6c;
+      font-size: 12px;
+
+      &:hover {
+        color: #f78989;
+      }
+    }
+
     .collapse-btn {
       padding: 4px;
     }
@@ -169,6 +207,16 @@ function handleTabChange(name: string): void {
     }
   }
 
+  .effect-count {
+    padding: 8px 16px;
+    font-size: 12px;
+    color: #666;
+    background: #f5f7fa;
+    border-left: 3px solid #67c23a;
+    margin: 0 8px 8px;
+    border-radius: 4px;
+  }
+
   .effect-list {
     flex: 1;
     overflow-y: auto;
@@ -192,39 +240,54 @@ function handleTabChange(name: string): void {
     }
 
     &.active {
-      border-color: #667eea;
-      background: rgba(102, 126, 234, 0.05);
+      border-color: #67c23a;
+      background: rgba(103, 194, 58, 0.08);
 
       .effect-name {
-        color: #667eea;
+        color: #67c23a;
+        font-weight: 700;
       }
 
-      .check-icon {
-        color: #667eea;
+      .active-icon {
+        color: #67c23a;
       }
 
       &.icon-marker {
-        border-color: #667eea;
+        border-color: #67c23a;
       }
 
       &.icon-path {
-        border-color: #f5576c;
+        border-color: #67c23a;
       }
 
       &.icon-area {
-        border-color: #4facfe;
+        border-color: #67c23a;
       }
 
       &.icon-3d {
-        border-color: #43e97b;
+        border-color: #67c23a;
       }
 
       &.icon-particle {
-        border-color: #fa709a;
+        border-color: #67c23a;
       }
 
       &.icon-weather {
-        border-color: #a8edea;
+        border-color: #67c23a;
+      }
+    }
+
+    &.selected {
+      &::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 4px;
+        height: 60%;
+        background: linear-gradient(180deg, #409eff 0%, #53a8ff 100%);
+        border-radius: 0 4px 4px 0;
       }
     }
 
@@ -282,9 +345,23 @@ function handleTabChange(name: string): void {
       }
     }
 
-    .check-icon {
-      color: #667eea;
-      font-size: 20px;
+    .effect-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+
+      .active-icon {
+        font-size: 20px;
+      }
+
+      .inactive-icon {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #dcdfe6;
+        border-radius: 50%;
+      }
     }
   }
 }

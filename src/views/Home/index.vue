@@ -7,8 +7,10 @@
       v-model:active-category="activeCategory"
       v-model:search-keyword="searchKeyword"
       v-model:selected-effect="currentEffect"
+      v-model:active-effects="activeEffects"
       :effects="filteredEffects"
       @select="handleEffectSelect"
+      @close-all="closeAllEffects"
     />
 
 <!--    <EffectControlPanel
@@ -54,6 +56,7 @@ const currentEffect = ref<MapEffect | null>(null)
 const showCodeDialog = ref(false)
 const currentCenter = ref(DEFAULT_CENTER)
 const isMapLoaded = ref(false)
+const activeEffects = ref<Set<number>>(new Set()) // 存储当前激活的特效ID
 
 const effects = ref<MapEffect[]>(EFFECTS_LIST)
 
@@ -95,24 +98,27 @@ function handleEffectSelect(effect: MapEffect): void {
     return
   }
 
-  if (currentEffect.value && currentEffect.value.id === effect.id) {
-    currentEffect.value = null
+  // 如果特效已激活，则关闭该特效
+  if (activeEffects.value.has(effect.id)) {
     if (effectHandler) {
-      effectHandler.clear()
+      try {
+        effectHandler.clearEffect(effect.id)
+        activeEffects.value.delete(effect.id)
+        ElMessage.info(`已关闭特效: ${effect.name}`)
+      } catch (error) {
+        console.error('关闭特效失败:', error)
+        ElMessage.error(`关闭特效失败: ${effect.name}`)
+      }
     }
-    // 不调用 resetMap，让特效的 cleanup 处理地图状态
     return
   }
 
-  // 切换特效时先清除旧特效
-  if (currentEffect.value && effectHandler) {
-    effectHandler.clear()
-  }
-
+  // 激活新特效（支持多选）
   currentEffect.value = effect
   if (effectHandler) {
     try {
       effectHandler.applyEffect(effect.id)
+      activeEffects.value.add(effect.id)
       ElMessage.success(`已应用特效: ${effect.name}`)
     } catch (error) {
       console.error('应用特效失败:', error)
@@ -122,11 +128,22 @@ function handleEffectSelect(effect: MapEffect): void {
 }
 
 function handleCloseEffect(): void {
+  if (!effectHandler) return
+
+  // 关闭所有激活的特效
+  const effectIds = Array.from(activeEffects.value)
+  effectIds.forEach(effectId => {
+    try {
+      effectHandler.clearEffect(effectId)
+    } catch (error) {
+      console.error(`关闭特效 ${effectId} 失败:`, error)
+    }
+  })
+
+  activeEffects.value.clear()
   currentEffect.value = null
-  if (effectHandler) {
-    effectHandler.clear()
-  }
-  // 不调用 resetMap，让特效的 cleanup 处理地图状态
+  effectHandler.clear()
+  ElMessage.success('已关闭所有特效')
 }
 
 function handleRefreshEffect(): void {
@@ -135,15 +152,44 @@ function handleRefreshEffect(): void {
     return
   }
 
-  if (currentEffect.value && effectHandler) {
-    try {
-      effectHandler.applyEffect(currentEffect.value.id)
-      ElMessage.success('特效已刷新')
-    } catch (error) {
-      console.error('刷新特效失败:', error)
-      ElMessage.error('刷新特效失败')
-    }
+  if (!currentEffect.value || !effectHandler) {
+    ElMessage.warning('请先选择一个特效')
+    return
   }
+
+  try {
+    // 刷新当前选中的特效
+    effectHandler.applyEffect(currentEffect.value.id)
+    ElMessage.success(`特效已刷新: ${currentEffect.value.name}`)
+  } catch (error) {
+    console.error('刷新特效失败:', error)
+    ElMessage.error('刷新特效失败')
+  }
+}
+
+// 关闭指定特效
+function closeSpecificEffect(effectId: number): void {
+  if (!effectHandler) return
+
+  try {
+    effectHandler.clearEffect(effectId)
+    activeEffects.value.delete(effectId)
+
+    // 如果关闭的是当前选中的特效，更新选中状态
+    if (currentEffect.value?.id === effectId) {
+      currentEffect.value = null
+    }
+
+    ElMessage.success('特效已关闭')
+  } catch (error) {
+    console.error('关闭特效失败:', error)
+    ElMessage.error('关闭特效失败')
+  }
+}
+
+// 批量关闭所有特效
+function closeAllEffects(): void {
+  handleCloseEffect()
 }
 
 function handleShowCode(): void {

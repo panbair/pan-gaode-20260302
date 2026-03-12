@@ -24,6 +24,11 @@ import { HolographicLabelEffect } from './holographicLabelEffect'
 import { TriColorLightBuildingEffect } from './triColorLightBuildingEffect'
 import { Polygon3DHealthEffect } from './polygon3DHealthEffect'
 import { FlowMapEffect } from './flowMapEffect'
+import { NeonCityEffect } from './neonCityEffect'
+import { BuildingFloorEffect } from './buildingFloorEffect'
+import { EconomyWaveEffect } from './economyWaveEffect'
+
+console.log('[EffectFactory] BuildingFloorEffect imported:', BuildingFloorEffect)
 
 export class EffectFactory {
   private static effectClasses: Record<number, new (context: EffectContext) => BaseEffect> = {
@@ -44,7 +49,14 @@ export class EffectFactory {
     15: HolographicLabelEffect,
     16: TriColorLightBuildingEffect,
     17: Polygon3DHealthEffect,
-    18: FlowMapEffect
+    18: FlowMapEffect,
+    19: NeonCityEffect,
+    20: BuildingFloorEffect,
+    21: EconomyWaveEffect
+  }
+
+  static {
+    console.log('[EffectFactory] effectClasses initialized:', Object.keys(this.effectClasses))
   }
 
   /**

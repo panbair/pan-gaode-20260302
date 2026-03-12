@@ -16,7 +16,8 @@ import {
   Star,
   MagicStick,
   Grid,
-  ArrowRight
+  ArrowRight,
+  MoonNight
 } from '@element-plus/icons-vue'
 
 export const EFFECTS_LIST: MapEffect[] = [
@@ -413,7 +414,7 @@ loca.add(pl);`
   },
   {
     id: 17,
-    name: '立体面健康度',
+    name: '立体面',
     description: '赛博朋克风格3D立体面，炫酷光影系统、漂浮粒子、呼吸动画、霓虹边框、多重动画叠加',
     category: '3d',
     difficulty: '高级',
@@ -632,5 +633,240 @@ const animateArrow = () => {
   requestAnimationFrame(animateArrow);
 };
 animateArrow();`
+  },
+  {
+    id: 20,
+    name: '建筑室内分层',
+    description: '3D多层建筑室内展示，每层楼独立高度和光照，逼真玻璃质感渲染',
+    category: '3d',
+    difficulty: '高级',
+    icon: markRaw(Grid),
+    apiVersion: '2.0 + Loca',
+    codeExample: `// 建筑室内分层特效
+// 配置室内光照系统
+loca.ambLight = {
+  intensity: 0.15,
+  color: '#ffffff'
+};
+loca.dirLight = {
+  intensity: 0.15,
+  color: '#ffffff',
+  target: [0, 0, 0],
+  position: [0, -1, 1]
+};
+loca.pointLight = {
+  color: '#c2beff',
+  position: [116.397428, 39.90923, 2000],
+  intensity: 4,
+  distance: 5000
+};
+
+// 创建基础楼层面
+const baseLayer = new Loca.PolygonLayer({
+  zIndex: 120,
+  opacity: 0.8,
+  shininess: 10,
+  visible: false
+});
+baseLayer.setSource(baseGeoSource);
+baseLayer.setStyle({
+  topColor: '#8889ff',
+  sideColor: '#8889ff',
+  height: 8,
+  altitude: 0,
+  unit: 'meter'
+});
+loca.add(baseLayer);
+
+// 创建商铺区域
+const shopLayer = new Loca.PolygonLayer({
+  zIndex: 125,
+  opacity: 0.7,
+  shininess: 20,
+  hasSide: false,
+  visible: false
+});
+shopLayer.setSource(shopGeoSource);
+shopLayer.setStyle({
+  topColor: '#867ef2',
+  sideColor: '#867ef2',
+  height: 6,
+  altitude: 10,
+  unit: 'meter'
+});
+loca.add(shopLayer);
+
+// 添加入场动画
+shopLayer.addAnimate({
+  key: 'altitude',
+  value: [0, 1],
+  duration: 4000,
+  easing: 'CircularOut',
+  transform: 500
+});
+shopLayer.show(500);
+
+// 视角旋转动画
+loca.viewControl.addAnimates([{
+  rotation: {
+    value: 0,
+    control: [[0, -147], [1, 0]],
+    timing: [0.3, 0, 0.8, 1],
+    duration: 6000
+  }
+}]);`
+  },
+  {
+    id: 19,
+    name: '霓虹城市夜景',
+    description: '赛博朋克风格霓虹城市，多彩建筑轮廓、霓虹招牌、霓虹道路光带、炫酷光晕效果',
+    category: 'weather',
+    difficulty: '高级',
+    icon: markRaw(MoonNight),
+    apiVersion: '2.0 + Loca',
+    codeExample: `// 霓虹城市夜景特效
+// 配置霓虹光照系统
+loca.ambLight = {
+  intensity: 0.3,
+  color: 'rgba(20, 30, 60, 0.8)'
+};
+loca.dirLight = {
+  intensity: 0.6,
+  color: 'rgba(180, 100, 255, 0.5)',
+  target: [0, 0, 0],
+  position: [0, -1, 2]
+};
+loca.pointLight = {
+  color: 'rgb(255, 0, 128)',
+  position: [116.397428, 39.90923, 50000],
+  intensity: 8,
+  distance: 300000
+};
+
+// 创建霓虹建筑
+const neonBuildingLayer = new Loca.PrismLayer({
+  zIndex: 120,
+  opacity: 0.9,
+  hasSide: true,
+  acceptLight: true
+});
+neonBuildingLayer.setSource(neonBuildingSource);
+neonBuildingLayer.setStyle({
+  unit: 'meter',
+  topColor: (index, feat) => feat.properties.baseColor,
+  sideTopColor: (index, feat) => darkenColor(feat.properties.baseColor, 0.3),
+  sideBottomColor: (index, feat) => darkenColor(feat.properties.baseColor, 0.6),
+  height: (index, feat) => feat.properties.height,
+  altitude: 0
+});
+loca.add(neonBuildingLayer);
+
+// 创建霓虹招牌
+const neonSignLayer = new Loca.PointLayer({
+  zIndex: 130,
+  opacity: 0.9
+});
+neonSignLayer.setSource(neonSignSource);
+neonSignLayer.setStyle({
+  unit: 'meter',
+  radius: (index, feat) => feat.properties.size,
+  color: (index, feat) => feat.properties.color
+});
+neonSignLayer.addAnimate({
+  key: 'radius',
+  value: [0.8, 1.3],
+  duration: 1500,
+  easing: 'SinusoidalInOut',
+  random: true,
+  repeat: Infinity
+});
+neonSignLayer.addAnimate({
+  key: 'opacity',
+  value: [0.6, 1],
+  duration: 1200,
+  easing: 'SinusoidalInOut',
+  random: true,
+  repeat: Infinity
+});
+loca.add(neonSignLayer);`
+  },
+  {
+    id: 21,
+    name: '经济波动',
+    description: '用波纹动画展示经济数据的时空传播效果，自定义着色器动画，多层波纹叠加模拟经济涟漪',
+    category: 'data',
+    difficulty: '高级',
+    icon: markRaw(TrendCharts),
+    apiVersion: '2.0 + Loca',
+    codeExample: `// 经济波动特效
+// 配置经济中心
+const economicCenters = [
+  {
+    id: 'bj',
+    name: '北京',
+    coords: [116.397428, 39.90923],
+    baseGrowth: 85,
+    volatility: 70,
+    influenceRadius: 500000,
+    color: '#ff6b6b'
+  },
+  {
+    id: 'sh',
+    name: '上海',
+    coords: [121.467428, 31.22923],
+    baseGrowth: 90,
+    volatility: 75,
+    influenceRadius: 500000,
+    color: '#ffd700'
+  }
+];
+
+// 创建波纹画布
+const waveCanvas = document.createElement('canvas');
+waveCanvas.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:100';
+map.getPanes().overlayPane.appendChild(waveCanvas);
+const ctx = waveCanvas.getContext('2d');
+
+// 绘制波纹（每帧更新）
+function drawWaves(time) {
+  ctx.clearRect(0, 0, waveCanvas.width, waveCanvas.height);
+  economicCenters.forEach(center => {
+    const centerPos = map.lngLatToContainer(center.coords);
+    const gradient = ctx.createRadialGradient(
+      centerPos.x, centerPos.y, 0,
+      centerPos.x, centerPos.y, center.influenceRadius / map.getResolution()
+    );
+    gradient.addColorStop(0, 'rgba(255, 215, 0, 0.4)');
+    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.2)');
+    gradient.addColorStop(1, 'rgba(255, 107, 107, 0.1)');
+    ctx.beginPath();
+    ctx.arc(centerPos.x, centerPos.y, center.influenceRadius / map.getResolution(), 0, Math.PI * 2);
+    ctx.fillStyle = gradient;
+    ctx.fill();
+  });
+  requestAnimationFrame(() => drawWaves(time + 0.016));
+}
+
+// 创建粒子层（经济指标粒子）
+const particleLayer = new Loca.ScatterLayer({
+  zIndex: 110,
+  opacity: 0.7
+});
+particleLayer.setSource(particleSource);
+particleLayer.setStyle({
+  unit: 'meter',
+  size: [2000, 4000],
+  texture: createParticleTexture(),
+  altitude: (index, item) => Math.random() * 5000 + 2000
+});
+particleLayer.addAnimate({
+  key: 'altitude',
+  value: [0, 3000],
+  duration: 4000,
+  easing: 'SineInOut',
+  yoyo: true,
+  repeat: Infinity
+});
+loca.add(particleLayer);`
   }
 ]

@@ -226,8 +226,7 @@ export class FlightPathEffect extends BaseEffect {
       scatterLayer: this.scatterLayer1,
       labelLayer: this.labelLayer,
       centerPointLayer: this.centerPointLayer,
-      switchPeriod: (period: string) => this.switchPeriod(period),
-      cleanup: () => this.cleanup()
+      switchPeriod: (period: string) => this.switchPeriod(period)
     })
 
     console.log('[FlightPathEffect V2] 特效应用完成')
@@ -474,7 +473,7 @@ export class FlightPathEffect extends BaseEffect {
 
 
   // 清理资源
-  private cleanup() {
+  protected cleanup(): void {
     console.log('[FlightPathEffect V2] 开始清理资源')
 
     if (this.labelLayer) {
@@ -494,6 +493,7 @@ export class FlightPathEffect extends BaseEffect {
       this.loca.remove(this.centerPointLayer)
     }
 
+    super.cleanup()
     console.log('[FlightPathEffect V2] 资源清理完成')
   }
 }
