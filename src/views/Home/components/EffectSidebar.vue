@@ -327,6 +327,11 @@ function handleTabChange(name: string): void {
       &.icon-building {
         background: linear-gradient(135deg, #eca049 0%, #daef15 100%);
       }
+
+      &.icon-data {
+        background: linear-gradient(135deg, #94a949 0%, #59c004 100%);
+      }
+
     }
 
     .effect-info {

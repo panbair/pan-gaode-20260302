@@ -870,85 +870,70 @@ particleLayer.addAnimate({
 loca.add(particleLayer);`
   },
   {
-    id: 22,
-    name: '交通演变',
-    description: '展示道路/地铁网络的历史扩展过程，时间轴控制动态线路增长，多类型交通可视化',
+    id: 23,
+    name: '雷达扫描',
+    description: '视觉冲击力强的雷达扫描效果，多层扫描线同心旋转，目标点标记和脉冲动画',
     category: 'data',
     difficulty: '高级',
-    icon: markRaw(Operation),
+    icon: markRaw(Grid),
     apiVersion: '2.0 + Loca',
-    codeExample: `// 交通演变特效
-// 定义交通站点数据
-const trafficNodes = [
-  { id: 't1', name: '天安门', coords: [116.397428, 39.90923], type: 'metro', buildYear: 1969 },
-  { id: 't2', name: '北京站', coords: [116.42678, 39.903738], type: 'metro', buildYear: 1969 },
-  { id: 't3', name: '西单', coords: [116.374525, 39.91288], type: 'metro', buildYear: 1969 }
-];
+    codeExample: `// 雷达扫描特效
+// 设置雷达中心
+const radarCenter = [116.397428, 39.90923];
+const scanRadius = 50000; // 50km
 
-// 定义交通线路数据
-const trafficLines = [
-  {
-    id: 'l1',
-    name: '地铁1号线',
-    nodes: ['t1', 't2', 't3'],
-    type: 'metro',
-    buildYear: 1969,
-    color: '#E4002B'
-  }
-];
-
-// 创建线路图层
-const lineLayer = new Loca.LineLayer({
+// 创建雷达圆环
+const circleLayer = new Loca.LineLayer({
   zIndex: 10,
-  opacity: 1
+  opacity: 0.8
 });
-lineLayer.setSource(lineSource);
-lineLayer.setStyle({
+circleLayer.setSource(circleData);
+circleLayer.setStyle({
   unit: 'meter',
-  lineWidth: (index, item) => {
-    const type = item?.properties?.type;
-    return type === 'metro' ? 300 : 200;
-  },
-  lineColor: (index, item) => item?.properties?.color || '#666666',
+  lineWidth: 200,
+  lineColor: 'rgba(0, 255, 255, 0.6)',
   altitude: 0
 });
-loca.add(lineLayer);
+loca.add(circleLayer);
 
-// 创建站点图层
-const nodeLayer = new Loca.ScatterLayer({
+// 创建扫描光束
+const scanBeamLayer = new Loca.PolygonLayer({
   zIndex: 15,
+  opacity: 0.4
+});
+scanBeamLayer.setSource(beamData);
+scanBeamLayer.setStyle({
+  topColor: 'rgba(0, 255, 255, 0.3)',
+  sideColor: 'rgba(0, 200, 255, 0.2)',
+  height: 5000,
+  altitude: 1000,
+  unit: 'meter'
+});
+loca.add(scanBeamLayer);
+
+// 创建目标点
+const targetLayer = new Loca.PointLayer({
+  zIndex: 20,
   opacity: 1
 });
-nodeLayer.setSource(nodeSource);
-nodeLayer.setStyle({
+targetLayer.setSource(targetData);
+targetLayer.setStyle({
   unit: 'meter',
-  size: (index, item) => {
-    const type = item?.properties?.type;
-    return type === 'metro' ? 6000 : 4000;
-  },
-  texture: createNodeTexture(item?.properties?.type),
-  altitude: 100
+  radius: 3000,
+  color: (index, item) => item.properties.color,
+  altitude: 200
 });
-loca.add(nodeLayer);
+loca.add(targetLayer);
 
-// 时间轴控制 - 根据当前年份更新可见性
-function updateVisibilityByTime(currentTime) {
-  const features = nodeLayer.getSource().data.features;
-  features.forEach(feature => {
-    const buildYear = feature.properties.buildYear;
-    feature.properties.opacity = buildYear <= currentTime ? 1 : 0;
-  });
-  nodeLayer.getSource().setData({ type: 'FeatureCollection', features });
-}
-
-// 启动时间动画
-let currentTime = 1990;
+// 扫描动画
+let scanAngle = 0;
 const animate = () => {
-  currentTime += 1;
-  if (currentTime > 2010) currentTime = 1990;
-  updateVisibilityByTime(currentTime);
+  scanAngle = (scanAngle + 2) % 360;
+  updateScanBeam(scanAngle);
+  detectTargets(scanAngle);
   requestAnimationFrame(animate);
 };
 animate();`
-  }
+  },
+
 ]

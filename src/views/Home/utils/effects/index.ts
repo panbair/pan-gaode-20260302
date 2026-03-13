@@ -32,6 +32,7 @@ export { NeonCityEffect } from './neonCityEffect'
 export { BuildingFloorEffect } from './buildingFloorEffect'
 export { EconomyWaveEffect } from './economyWaveEffect'
 export { TrafficEvolutionEffect } from './trafficEvolutionEffect'
+export { RadarScanEffect } from './radarScanEffect'
 
 // 工厂类
 export { EffectFactory } from './effectFactory'

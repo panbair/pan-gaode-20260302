@@ -28,8 +28,7 @@ import { NeonCityEffect } from './neonCityEffect'
 import { BuildingFloorEffect } from './buildingFloorEffect'
 import { EconomyWaveEffect } from './economyWaveEffect'
 import { TrafficEvolutionEffect } from './trafficEvolutionEffect'
-
-console.log('[EffectFactory] BuildingFloorEffect imported:', BuildingFloorEffect)
+import { RadarScanEffect } from './radarScanEffect'
 
 export class EffectFactory {
   private static effectClasses: Record<number, new (context: EffectContext) => BaseEffect> = {
@@ -54,7 +53,8 @@ export class EffectFactory {
     19: NeonCityEffect,
     20: BuildingFloorEffect,
     21: EconomyWaveEffect,
-    22: TrafficEvolutionEffect
+    22: TrafficEvolutionEffect,
+    23: RadarScanEffect
   }
 
   static {
