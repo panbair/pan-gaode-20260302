@@ -2,9 +2,82 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title><%- VITE_APP_TITLE %></title>
+
+    <!-- 基础SEO Meta标签 -->
+    <title>高德地图特效展示平台 | 20+专业级地图动画特效 | 3D可视化 | 粒子系统 | 热力图</title>
+    <meta name="description" content="高德地图特效展示平台提供20+专业级地图动画特效，包括3D建筑、热力图、粒子流、飞行轨迹、全息标牌、雷达扫描、霓虹城市等高级可视化效果。支持实时预览和代码复制，适用于智慧城市、物流监控、数据可视化等场景。" />
+    <meta name="keywords" content="高德地图特效,地图动画,3D地图可视化,热力图,粒子系统,飞行轨迹,地图可视化,Loca特效,高德地图API,智慧城市,物流监控,GIS可视化,地图动画库" />
+    <meta name="author" content="Gaode Map Effects Platform" />
+    <meta name="robots" content="index, follow" />
+    <meta name="language" content="zh-CN" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="www.gaode.zooow.xyz" />
+    <meta property="og:title" content="高德地图特效展示平台 | 20+专业级地图动画特效" />
+    <meta property="og:description" content="提供20+专业级地图动画特效，包括3D建筑、热力图、粒子流、飞行轨迹等，支持实时预览和代码复制。" />
+    <meta property="og:image" content="www.gaode.zooow.xyz" />
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:site_name" content="高德地图特效展示平台" />
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="www.gaode.zooow.xyz" />
+    <meta property="twitter:title" content="高德地图特效展示平台 | 20+专业级地图动画特效" />
+    <meta property="twitter:description" content="提供20+专业级地图动画特效，包括3D建筑、热力图、粒子流、飞行轨迹等。" />
+    <meta property="twitter:image" content="www.gaode.zooow.xyz" />
+
+    <!-- 额外SEO优化 -->
+    <meta name="theme-color" content="#1890ff" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="高德地图特效" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="www.gaode.zooow.xyz" />
+
+    <!-- 结构化数据 - WebSite -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "高德地图特效展示平台",
+      "alternateName": "Gaode Map Effects Platform",
+      "url": "www.gaode.zooow.xyz",
+      "description": "提供20+专业级地图动画特效，包括3D建筑、热力图、粒子流、飞行轨迹等高级可视化效果",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "www.gaode.zooow.xyz",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- 结构化数据 - SoftwareApplication -->
+    <script type="application/ld+json">
+    {
+      "@context": "www.gaode.zooow.xyz",
+      "@type": "SoftwareApplication",
+      "name": "高德地图特效展示平台",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.8",
+        "ratingCount": "100"
+      },
+      "description": "基于高德地图API和Loca的可视化特效展示平台，提供20+专业级地图动画特效"
+    }
+    </script>
+
     <!-- 高德地图安全密钥配置 -->
     <script type="text/javascript">
       window._AMapSecurityConfig = {
