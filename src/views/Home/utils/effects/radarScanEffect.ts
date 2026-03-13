@@ -31,6 +31,8 @@ export class RadarScanEffect extends BaseEffect {
   private animationId: number | null = null
   private radarCircleLayer: any = null
   private scanBeamLayer: any = null
+  private scanBeamEdgeLayer: any = null
+  private scanBeamRotation: number = 0
   private targetLayer: any = null
   private particleLayer: any = null
   private glowLayer: any = null
@@ -98,19 +100,19 @@ export class RadarScanEffect extends BaseEffect {
 
   private setupRadarLighting(): void {
     this.loca.ambLight = {
-      intensity: 0.3,
-      color: 'rgba(0, 20, 40, 0.8)'
+      intensity: 0.2,
+      color: 'rgba(8, 4, 24, 0.95)'
     }
     this.loca.dirLight = {
-      intensity: 0.5,
-      color: 'rgba(0, 150, 255, 0.4)',
+      intensity: 0.8,
+      color: 'rgba(79, 70, 229, 0.4)', // 靛蓝色光
       target: [0, 0, 0],
       position: [1, -1, 2]
     }
     this.loca.pointLight = {
-      color: 'rgb(0, 255, 255)',
+      color: 'rgb(236, 72, 153)', // 玫红色
       position: [...this.radarCenter, 10000],
-      intensity: 8,
+      intensity: 12,
       distance: 100000
     }
   }
@@ -193,7 +195,16 @@ export class RadarScanEffect extends BaseEffect {
     this.radarCircleLayer.setStyle({
       unit: 'meter',
       lineWidth: (index, item) => item?.properties?.width || 200,
-      lineColor: 'rgba(0, 255, 255, 0.6)',
+      lineColor: (index, item) => {
+        const colors = [
+          'rgba(236, 72, 153, 0.9)',  // 玫红色 - 最内层
+          'rgba(168, 85, 247, 0.8)',  // 紫色
+          'rgba(99, 102, 241, 0.7)',  // 靛蓝色
+          'rgba(59, 130, 246, 0.6)',  // 蓝色
+          'rgba(34, 211, 238, 0.5)'   // 青色 - 最外层
+        ]
+        return colors[index % colors.length]
+      },
       altitude: 0
     })
     this.addLocaLayer(this.radarCircleLayer)
@@ -213,6 +224,19 @@ export class RadarScanEffect extends BaseEffect {
   private createScanBeam(): void {
     const Loca = (window as any).Loca
 
+    // 创建扫描扇形 - 使用多边形
+    const segments = 60
+    const beamAngle = 30 // 扫描光束宽度（度）
+    const coords: [number, number][] = [this.radarCenter]
+
+    for (let i = 0; i <= segments; i++) {
+      const angle = (i / segments) * beamAngle * (Math.PI / 180)
+      const lng = this.radarCenter[0] + (this.scanRadius * Math.cos(angle)) / 111000
+      const lat = this.radarCenter[1] + (this.scanRadius * Math.sin(angle)) / 111000
+      coords.push([lng, lat])
+    }
+    coords.push(this.radarCenter)
+
     const beamData = {
       type: 'FeatureCollection',
       features: [
@@ -220,17 +244,9 @@ export class RadarScanEffect extends BaseEffect {
           type: 'Feature',
           geometry: {
             type: 'Polygon',
-            coordinates: [[]]
+            coordinates: [coords]
           },
           properties: { id: 'main' }
-        },
-        {
-          type: 'Feature',
-          geometry: {
-            type: 'Polygon',
-            coordinates: [[]]
-          },
-          properties: { id: 'secondary' }
         }
       ]
     }
@@ -247,13 +263,64 @@ export class RadarScanEffect extends BaseEffect {
 
     this.scanBeamLayer.setSource(beamSource)
     this.scanBeamLayer.setStyle({
-      topColor: 'rgba(0, 255, 255, 0.3)',
-      sideColor: 'rgba(0, 200, 255, 0.2)',
-      height: 5000,
-      altitude: 1000,
+      topColor: 'rgba(236, 72, 153, 0.2)', // 玫红色渐变 - 降低不透明度
+      sideColor: 'rgba(99, 102, 241, 0.1)', // 靛蓝色侧面 - 降低不透明度
+      height: 3000, // 减小高度
+      altitude: 1000, // 减小高度
       unit: 'meter'
     })
     this.addLocaLayer(this.scanBeamLayer)
+
+    // 创建扫描光束边缘线
+    this.createScanBeamEdge()
+  }
+
+  private createScanBeamEdge(): void {
+    const Loca = (window as any).Loca
+
+    // 扫描光束边缘坐标
+    const segments = 60
+    const beamAngle = 30
+    const coords: [number, number][] = []
+
+    for (let i = 0; i <= segments; i++) {
+      const angle = (i / segments) * beamAngle * (Math.PI / 180)
+      const lng = this.radarCenter[0] + (this.scanRadius * Math.cos(angle)) / 111000
+      const lat = this.radarCenter[1] + (this.scanRadius * Math.sin(angle)) / 111000
+      coords.push([lng, lat])
+    }
+
+    const edgeData = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: coords
+          },
+          properties: { id: 'edge' }
+        }
+      ]
+    }
+
+    this.scanBeamEdgeLayer = new Loca.LineLayer({
+      zIndex: 16,
+      opacity: 1
+    })
+
+    const edgeSource = new Loca.GeoJSONSource({
+      data: edgeData
+    })
+
+    this.scanBeamEdgeLayer.setSource(edgeSource)
+    this.scanBeamEdgeLayer.setStyle({
+      unit: 'meter',
+      lineWidth: 100, // 减小线宽
+      lineColor: 'rgba(236, 72, 153, 0.6)', // 降低不透明度
+      altitude: 1000 // 与扫描光束高度一致
+    })
+    this.addLocaLayer(this.scanBeamEdgeLayer)
   }
 
   private createTargetLayer(): void {
@@ -340,7 +407,7 @@ export class RadarScanEffect extends BaseEffect {
           distance,
           speed: 0.5 + Math.random() * 1.5,
           size: 200 + Math.random() * 400,
-          color: '#00FFFF',
+          color: Math.random() > 0.5 ? '#A855F7' : '#EC4899', // 紫色或玫红色
           altitude: Math.random() * 3000
         }
       })
@@ -364,7 +431,7 @@ export class RadarScanEffect extends BaseEffect {
     this.particleLayer.setStyle({
       unit: 'meter',
       radius: (index, item) => item?.properties?.size || 300,
-      color: (index, item) => item?.properties?.color || '#00FFFF',
+      color: (index, item) => item?.properties?.color || '#A855F7',
       altitude: (index, item) => item?.properties?.altitude || 1000
     })
     this.addLocaLayer(this.particleLayer)
@@ -439,8 +506,8 @@ export class RadarScanEffect extends BaseEffect {
 
     this.glowLayer.setSource(glowSource)
     this.glowLayer.setStyle({
-      topColor: 'rgba(0, 150, 255, 0.15)',
-      sideColor: 'rgba(0, 100, 255, 0.1)',
+      topColor: 'rgba(168, 85, 247, 0.08)', // 紫色光晕
+      sideColor: 'rgba(236, 72, 153, 0.05)', // 玫红色光晕
       height: 100,
       altitude: 0,
       unit: 'meter'
@@ -462,10 +529,10 @@ export class RadarScanEffect extends BaseEffect {
     const animate = () => {
       this.scanAngle = (this.scanAngle + this.scanSpeed) % 360
 
-      // 更新扫描光束
+      // 更新扫描光束位置
       this.updateScanBeam()
 
-      // 检测目标
+      // 检测目标（仅记录日志，不更新数据）
       this.detectTargets()
 
       // 更新粒子
@@ -478,22 +545,28 @@ export class RadarScanEffect extends BaseEffect {
   }
 
   private updateScanBeam(): void {
-    const beamAngle = this.scanAngle
+    const Loca = (window as any).Loca
+
+    // 创建旋转后的扫描扇形
+    const segments = 60
     const beamWidth = 30 // 扫描光束宽度（度）
+    const coords: [number, number][] = [this.radarCenter]
+    const edgeCoords: [number, number][] = []
 
-    // 主扫描光束
-    const mainBeamCoords: [number, number][] = [
-      this.radarCenter,
-      ...this.generateBeamArc(beamAngle, beamWidth)
-    ]
+    const startAngle = this.scanAngle - beamWidth / 2
+    const endAngle = this.scanAngle + beamWidth / 2
 
-    // 次级光束（延迟）
-    const secondaryBeamAngle = (beamAngle + 180) % 360
-    const secondaryBeamCoords: [number, number][] = [
-      this.radarCenter,
-      ...this.generateBeamArc(secondaryBeamAngle, beamWidth * 0.5)
-    ]
+    for (let i = 0; i <= segments; i++) {
+      const angle = startAngle + (i / segments) * (endAngle - startAngle)
+      const radians = angle * (Math.PI / 180)
+      const lng = this.radarCenter[0] + (this.scanRadius * Math.cos(radians)) / 111000
+      const lat = this.radarCenter[1] + (this.scanRadius * Math.sin(radians)) / 111000
+      coords.push([lng, lat])
+      edgeCoords.push([lng, lat])
+    }
+    coords.push(this.radarCenter)
 
+    // 更新扫描光束
     const beamData = {
       type: 'FeatureCollection',
       features: [
@@ -501,38 +574,39 @@ export class RadarScanEffect extends BaseEffect {
           type: 'Feature',
           geometry: {
             type: 'Polygon',
-            coordinates: [[...mainBeamCoords, mainBeamCoords[0]]]
+            coordinates: [coords]
           },
-          properties: { id: 'main', angle: beamAngle }
-        },
-        {
-          type: 'Feature',
-          geometry: {
-            type: 'Polygon',
-            coordinates: [[...secondaryBeamCoords, secondaryBeamCoords[0]]]
-          },
-          properties: { id: 'secondary', angle: secondaryBeamAngle }
+          properties: { id: 'main' }
         }
       ]
     }
 
-    this.scanBeamLayer.getSource().setData(beamData)
-  }
+    const beamSource = new Loca.GeoJSONSource({
+      data: beamData
+    })
 
-  private generateBeamArc(centerAngle: number, width: number): [number, number][] {
-    const coords: [number, number][] = []
-    const segments = 30
-    const startAngle = centerAngle - width / 2
-    const endAngle = centerAngle + width / 2
+    this.scanBeamLayer.setSource(beamSource)
 
-    for (let i = 0; i <= segments; i++) {
-      const angle = (startAngle + (endAngle - startAngle) * (i / segments)) * (Math.PI / 180)
-      const lng = this.radarCenter[0] + (this.scanRadius * Math.cos(angle)) / 111000
-      const lat = this.radarCenter[1] + (this.scanRadius * Math.sin(angle)) / 111000
-      coords.push([lng, lat])
+    // 更新扫描边缘线
+    const edgeData = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'LineString',
+            coordinates: edgeCoords
+          },
+          properties: { id: 'edge' }
+        }
+      ]
     }
 
-    return coords
+    const edgeSource = new Loca.GeoJSONSource({
+      data: edgeData
+    })
+
+    this.scanBeamEdgeLayer.setSource(edgeSource)
   }
 
   private detectTargets(): void {
@@ -554,35 +628,6 @@ export class RadarScanEffect extends BaseEffect {
         this.log.info(`[RadarScanEffect] 检测到目标: ${target.name} (${target.type})`)
       }
     })
-
-    // 更新目标层显示状态
-    const targetFeatures = this.targets.map(target => ({
-      type: 'Feature',
-      geometry: {
-        type: 'Point',
-        coordinates: target.coords
-      },
-      properties: {
-        id: target.id,
-        name: target.name,
-        type: target.type,
-        detected: target.detected,
-        color: this.getTargetColor(target.type),
-        size: target.detected
-          ? target.type === 'hostile'
-            ? 5000
-            : 4000
-          : 0,
-        opacity: target.detected ? 1 : 0.3
-      }
-    }))
-
-    const targetData = {
-      type: 'FeatureCollection',
-      features: targetFeatures
-    }
-
-    this.targetLayer.getSource().setData(targetData)
   }
 
   private calculateAngle(center: [number, number], point: [number, number]): number {
@@ -592,20 +637,7 @@ export class RadarScanEffect extends BaseEffect {
   }
 
   private updateParticles(): void {
-    const source = this.particleLayer.getSource()
-    const features = source.data.features
-
-    features.forEach((feature: any) => {
-      const props = feature.properties
-      props.angle += (props.speed * Math.PI / 180) * 0.01
-
-      const x = this.radarCenter[0] + (props.distance * Math.cos(props.angle)) / 111000
-      const y = this.radarCenter[1] + (props.distance * Math.sin(props.angle)) / 111000
-
-      feature.geometry.coordinates = [x, y]
-    })
-
-    source.setData({ type: 'FeatureCollection', features })
+    // 粒子动画由 Loca 内置动画系统处理，无需手动更新数据
   }
 
   private playEntranceAnimation(): void {
@@ -637,12 +669,12 @@ export class RadarScanEffect extends BaseEffect {
 
   private getTargetColor(type: string): string {
     const colors: Record<string, string> = {
-      hostile: '#FF3333',
-      friendly: '#33FF33',
-      neutral: '#FFFF33',
-      unknown: '#FFFFFF'
+      hostile: '#EF4444',    // 红色 - 敌对目标
+      friendly: '#10B981',   // 翠绿色 - 友好目标
+      neutral: '#F59E0B',    // 琥珀色 - 中立目标
+      unknown: '#94A3B8'     // 蓝灰色 - 未知目标
     }
-    return colors[type] || '#00FFFF'
+    return colors[type] || '#10B981'
   }
 
   cleanup(): void {
